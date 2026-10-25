@@ -1,6 +1,7 @@
 include(CTest)
 
 set(UNIT_TESTS
+    test_figure
     test_null_rendering
     test_rendering_utility_api
     test_default_rendering_robustness
