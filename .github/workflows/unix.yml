@@ -85,3 +85,32 @@ jobs:
       - name: Run Debug Python tests
         if: matrix.build_type == 'Debug'
         run: ctest --test-dir "${{ runner.workspace }}/build" -L python --output-on-failure
+
+      - name: Prepare C++ Rendering tutorial
+        if: matrix.build_type == 'Release'
+        run: cmake -E copy_directory "$GITHUB_WORKSPACE/tutorials/tutorial_rendering" "${{ runner.workspace }}/tutorial_rendering"
+
+      - name: Build and run C++ Rendering tutorial
+        if: matrix.build_type == 'Release'
+        working-directory: ${{ runner.workspace }}/tutorial_rendering
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_PREFIX_PATH="${{ runner.workspace }}/install" \
+            -DCMAKE_CXX_COMPILER="${{ matrix.config.cxx }}" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          cmake --build build --parallel "$NPROC"
+          export LD_LIBRARY_PATH="${{ runner.workspace }}/install/lib:${LD_LIBRARY_PATH:-}"
+          export DYLD_LIBRARY_PATH="${{ runner.workspace }}/install/lib:${DYLD_LIBRARY_PATH:-}"
+          (cd build && ./tutorial_rendering)
+          python -c "from pathlib import Path; names=['layers','layers_large','cleared','projection_xy','projection_xz','plot']; files=[Path('build/tutorial_rendering_'+n+'.png') for n in names]; assert all(p.exists() and p.read_bytes()[:8]==bytes.fromhex('89504e470d0a1a0a') for p in files), files"
+
+      - name: Run Python Rendering tutorial
+        if: matrix.build_type == 'Release'
+        working-directory: ${{ github.workspace }}/python/tutorials
+        env:
+          PYTHONPATH: ${{ runner.workspace }}/build/python
+          LD_LIBRARY_PATH: ${{ runner.workspace }}/install/lib:${{ env.LD_LIBRARY_PATH }}
+          DYLD_LIBRARY_PATH: ${{ runner.workspace }}/install/lib:${{ env.DYLD_LIBRARY_PATH }}
+        run: |
+          python tutorial_rendering.py
+          python -c "from pathlib import Path; files=[Path('tutorial_rendering_empty.png'),Path('tutorial_rendering_cleared.png')]; assert all(p.exists() and p.read_bytes()[:8]==bytes.fromhex('89504e470d0a1a0a') for p in files), files"

@@ -69,3 +69,34 @@ jobs:
       - name: Run Debug Python tests
         if: matrix.build_type == 'Debug'
         run: ctest --test-dir build -L python --output-on-failure
+
+      - name: Prepare C++ Rendering tutorial
+        if: matrix.build_type == 'Release'
+        run: cmake -E copy_directory "$env:GITHUB_WORKSPACE/tutorials/tutorial_rendering" "${{ runner.workspace }}/tutorial_rendering"
+
+      - name: Build and run C++ Rendering tutorial
+        if: matrix.build_type == 'Release'
+        shell: pwsh
+        working-directory: ${{ runner.workspace }}/tutorial_rendering
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ runner.workspace }}/install" -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build build --parallel
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:PATH = "${{ runner.workspace }}\install\bin;$env:PATH"
+          & ".\build\tutorial_rendering.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -c "from pathlib import Path; names=['layers','layers_large','cleared','projection_xy','projection_xz','plot']; files=[Path('build/tutorial_rendering_'+n+'.png') for n in names]; assert all(p.exists() and p.read_bytes()[:8]==bytes.fromhex('89504e470d0a1a0a') for p in files), files"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run Python Rendering tutorial
+        if: matrix.build_type == 'Release'
+        shell: pwsh
+        working-directory: ${{ github.workspace }}/python/tutorials
+        run: |
+          $env:PATH = "${{ runner.workspace }}\install\bin;$env:PATH"
+          $env:PYTHONPATH = "${{ github.workspace }}\build\python"
+          python tutorial_rendering.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -c "from pathlib import Path; files=[Path('tutorial_rendering_empty.png'),Path('tutorial_rendering_cleared.png')]; assert all(p.exists() and p.read_bytes()[:8]==bytes.fromhex('89504e470d0a1a0a') for p in files), files"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
