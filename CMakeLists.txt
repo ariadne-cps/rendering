@@ -38,6 +38,7 @@ target_include_directories(rendering INTERFACE
 target_link_libraries(rendering INTERFACE utility)
 
 add_subdirectory(src)
+add_subdirectory(benchmarks)
 target_link_libraries(RENDERING_SRC PRIVATE rendering)
 
 ariadne_register_public_headers(

@@ -1,0 +1,5 @@
+add_executable(benchmark_rendering EXCLUDE_FROM_ALL benchmark_rendering.cpp)
+target_link_libraries(benchmark_rendering PRIVATE ariadne-rendering rendering)
+
+add_custom_target(benchmarks)
+add_dependencies(benchmarks benchmark_rendering)
