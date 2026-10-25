@@ -98,8 +98,10 @@ void export_properties(pybind11::module& module) {
         .def("set_dot_radius",&RenderingProperties::set_dot_radius,reference_internal)
         .def("set_line_style",&RenderingProperties::set_line_style,reference_internal)
         .def("set_line_width",&RenderingProperties::set_line_width,reference_internal)
+        .def("set_line_colour",(RenderingProperties&(RenderingProperties::*)(double,double,double))&RenderingProperties::set_line_colour,reference_internal)
         .def("set_line_colour",(RenderingProperties&(RenderingProperties::*)(Colour))&RenderingProperties::set_line_colour,reference_internal)
         .def("set_fill_style",&RenderingProperties::set_fill_style,reference_internal)
+        .def("set_fill_colour",(RenderingProperties&(RenderingProperties::*)(double,double,double))&RenderingProperties::set_fill_colour,reference_internal)
         .def("set_fill_colour",(RenderingProperties&(RenderingProperties::*)(Colour))&RenderingProperties::set_fill_colour,reference_internal)
         .def("set_fill_opacity",&RenderingProperties::set_fill_opacity,reference_internal)
         .def("set_animated",&RenderingProperties::set_animated,reference_internal)
@@ -110,7 +112,8 @@ void export_properties(pybind11::module& module) {
         .def_readwrite("fill_style",&RenderingProperties::fill_style)
         .def_readwrite("fill_colour",&RenderingProperties::fill_colour)
         .def_readwrite("is_animated",&RenderingProperties::is_animated)
-        .def("__str__",&__cstr__<RenderingProperties>);
+        .def("__str__",&__cstr__<RenderingProperties>)
+        .def("__repr__",&__cstr__<RenderingProperties>);
 }
 
 void export_figure(pybind11::module& module) {
@@ -130,8 +133,10 @@ void export_figure(pybind11::module& module) {
         .def("set_dot_radius",&Figure::set_dot_radius,reference_internal)
         .def("set_line_style",&Figure::set_line_style,reference_internal)
         .def("set_line_width",&Figure::set_line_width,reference_internal)
+        .def("set_line_colour",(Figure&(Figure::*)(double,double,double))&Figure::set_line_colour,reference_internal)
         .def("set_line_colour",(Figure&(Figure::*)(Colour))&Figure::set_line_colour,reference_internal)
         .def("set_fill_style",&Figure::set_fill_style,reference_internal)
+        .def("set_fill_colour",(Figure&(Figure::*)(double,double,double))&Figure::set_fill_colour,reference_internal)
         .def("set_fill_colour",(Figure&(Figure::*)(Colour))&Figure::set_fill_colour,reference_internal)
         .def("set_fill_opacity",&Figure::set_fill_opacity,reference_internal)
         .def("get_bounding_box",&Figure::get_bounding_box)
@@ -146,7 +151,9 @@ void export_figure(pybind11::module& module) {
         .def("properties",(RenderingProperties&(Figure::*)())&Figure::properties,reference_internal)
         .def("clear",&Figure::clear,reference_internal)
         .def("set_animated",&Figure::set_animated,reference_internal)
-        .def("write",(Void(Figure::*)(Char const*)const)&Figure::write);
+        .def("draw",(Figure&(Figure::*)(Drawable2dInterface const&))&Figure::draw,reference_internal)
+        .def("write",(Void(Figure::*)(Char const*)const)&Figure::write)
+        .def("write",(Void(Figure::*)(Char const*,Nat,Nat)const)&Figure::write);
 }
 
 void export_backend(pybind11::module& module) {
