@@ -1019,6 +1019,28 @@ void test_subpixel_join_triangle() {
 }
 
 //! \brief A two-pixel-wide rectangle must agree with the general winding fill.
+//! \brief A miter bridge may extend outside the plot without colouring the margin.
+void test_left_clipped_miter_bridge() {
+    DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
+    canvas.initialise("","",-1.0,1.0,-1.0,1.0);
+    canvas.set_line_width(8.0);
+    canvas.set_line_colour(1.0,0.0,0.0);
+    canvas.move_to(-0.8,-0.3);
+    canvas.line_to(-1.0,0.0);
+    canvas.line_to(-0.8,0.3);
+    canvas.stroke();
+    canvas.write("default_rendering-left-clipped-miter.png");
+    const auto image=DrawingTest::read_default_rendering_png(
+        "default_rendering-left-clipped-miter.png");
+    DrawingTest::require(image.pixel(159u,58u)==
+                             std::array<unsigned char,3>{255,255,255},
+                         "Miter bridge painted outside the left plot boundary");
+    DrawingTest::require(
+        DrawingTest::world_pixel(image,-0.9,-0.15)==
+            std::array<unsigned char,3>{255,0,0},
+        "Clipped miter stroke failed to paint its visible segment");
+}
+
 void test_narrow_full_height_rectangle() {
     const auto render=[](bool split_edge,const char* filename) {
         DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
@@ -1428,6 +1450,7 @@ int main() {
         test_collinear_stroke_join();
         test_subpixel_join_triangle();
         test_narrow_full_height_rectangle();
+        test_left_clipped_miter_bridge();
         test_anisotropic_circle_radius_overflow();
         test_nonfinite_join_triangle_bounds();
         test_one_pixel_high_plot_labels();
