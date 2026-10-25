@@ -9,6 +9,22 @@ Its only Ariadne runtime dependency is [ariadne-cps/utility](https://github.com/
 
 The repository deliberately does not depend on numeric, interval, algebra, function, geometry, solving, or drawing modules. Mathematical objects are adapted to rendering by higher-level repositories.
 
+## C++ public header
+
+C++ executables linking `ariadne-rendering` can include the full rendering API with a single header, `ariadne-rendering.hpp`:
+
+```cpp
+#include "ariadne-rendering.hpp"
+
+int main() {
+    using namespace Ariadne;
+    Figure figure(RenderingBox({{-1.0,1.0},{-1.0,1.0}}),Projection2d(2u,0u,1u));
+    figure.set_fill_colour(blue);
+}
+```
+
+The header covers figures, colours, rendering geometry, canvas and backend interfaces, the default and null backends, and backend management.
+
 ## Build
 
 Clone the repository together with its Git submodules:

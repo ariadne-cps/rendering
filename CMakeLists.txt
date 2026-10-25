@@ -43,6 +43,7 @@ target_link_libraries(RENDERING_SRC PRIVATE rendering)
 ariadne_register_public_headers(
     TARGET rendering
     DIRECTORIES "${PROJECT_SOURCE_DIR}/include/rendering"
+    FILES "${PROJECT_SOURCE_DIR}/include/ariadne-rendering.hpp"
 )
 
 setup_project_library(
