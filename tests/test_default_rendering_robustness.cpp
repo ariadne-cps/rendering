@@ -1018,6 +1018,37 @@ void test_subpixel_join_triangle() {
                          "Subpixel join unexpectedly covered a raster sample");
 }
 
+//! \brief A two-pixel-wide rectangle must agree with the general winding fill.
+void test_narrow_full_height_rectangle() {
+    const auto render=[](bool split_edge,const char* filename) {
+        DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
+        canvas.initialise("","",-1.0,1.0,-1.0,1.0);
+        canvas.set_line_width(0.0);
+        canvas.set_fill_colour(1.0,0.0,0.0);
+        canvas.set_fill_opacity(1.0);
+        canvas.move_to(-0.25,-0.5);
+        canvas.line_to(-0.21875,-0.5);
+        if(split_edge) canvas.line_to(-0.21875,0.0);
+        canvas.line_to(-0.21875,0.5);
+        canvas.line_to(-0.25,0.5);
+        canvas.fill();
+        canvas.write(filename);
+        return DrawingTest::read_default_rendering_png(filename);
+    };
+    const auto rectangle_image=render(false,"default_rendering-narrow-rectangle.png");
+    const auto polygon_image=render(true,"default_rendering-narrow-polygon.png");
+    DrawingTest::require(rectangle_image.pixels==polygon_image.pixels,
+                         "Two-pixel rectangle fast path differs from winding fill");
+    DrawingTest::require(
+        DrawingTest::world_pixel(rectangle_image,-0.234375,0.0)==
+            std::array<unsigned char,3>{255,0,0},
+        "Two-pixel rectangle failed to paint its interior");
+    DrawingTest::require(
+        DrawingTest::world_pixel(rectangle_image,-0.3125,0.0)==
+            std::array<unsigned char,3>{247,247,247},
+        "Two-pixel rectangle painted beyond its left edge");
+}
+
 //! \brief A valid anisotropic mapping can overflow only the vertical
 //! device-space circle radius; such a circle must be ignored safely.
 void test_anisotropic_circle_radius_overflow() {
@@ -1396,6 +1427,7 @@ int main() {
         test_repeated_terminal_stroke_vertex();
         test_collinear_stroke_join();
         test_subpixel_join_triangle();
+        test_narrow_full_height_rectangle();
         test_anisotropic_circle_radius_overflow();
         test_nonfinite_join_triangle_bounds();
         test_one_pixel_high_plot_labels();
