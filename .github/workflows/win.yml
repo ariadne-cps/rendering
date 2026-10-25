@@ -52,7 +52,7 @@ jobs:
 
       - name: Build Release library and bindings
         if: matrix.build_type == 'Release'
-        run: cmake --build build --parallel --target ariadne-rendering bindings
+        run: cmake --build build --parallel --target ariadne-rendering bindings benchmarks
 
       - name: Install Release library and bindings
         if: matrix.build_type == 'Release'
