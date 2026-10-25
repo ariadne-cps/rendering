@@ -958,6 +958,66 @@ void test_offscreen_miter_join_triangles() {
                          "Offscreen join triangles unexpectedly painted the canvas");
 }
 
+//! \\brief An endpoint repeated after a segment is geometrically inert.
+void test_repeated_terminal_stroke_vertex() {
+    const auto render=[](bool repeat,const char* filename) {
+        DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
+        canvas.initialise("","",-1.0,1.0,-1.0,1.0);
+        canvas.set_line_width(4.0);
+        canvas.set_line_colour(1.0,0.0,0.0);
+        canvas.move_to(-0.75,0.0);
+        canvas.line_to(0.5,0.0);
+        if(repeat) canvas.line_to(0.5,0.0);
+        canvas.stroke();
+        canvas.write(filename);
+        return DrawingTest::read_default_rendering_png(filename);
+    };
+    const auto ordinary=render(false,"default_rendering-terminal-stroke.png");
+    const auto repeated=render(true,"default_rendering-repeated-terminal-stroke.png");
+    DrawingTest::require(repeated.pixels==ordinary.pixels,
+                         "Repeating a terminal stroke vertex changed the image");
+}
+
+//! \\brief A straight join has no extra miter or paint.
+void test_collinear_stroke_join() {
+    const auto render=[](bool split,const char* filename) {
+        DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
+        canvas.initialise("","",-1.0,1.0,-1.0,1.0);
+        canvas.set_line_width(4.0);
+        canvas.set_line_colour(0.0,0.0,1.0);
+        canvas.move_to(-0.75,0.0);
+        if(split) canvas.line_to(0.0,0.0);
+        canvas.line_to(0.75,0.0);
+        canvas.stroke();
+        canvas.write(filename);
+        return DrawingTest::read_default_rendering_png(filename);
+    };
+    const auto ordinary=render(false,"default_rendering-unsplit-stroke.png");
+    const auto split=render(true,"default_rendering-collinear-stroke.png");
+    DrawingTest::require(split.pixels==ordinary.pixels,
+                         "Splitting a straight stroke introduced an extra join");
+}
+
+//! \\brief A finite miter bridge smaller than one sample remains invisible.
+void test_subpixel_join_triangle() {
+    DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
+    canvas.initialise("","",-1.0,1.0,-1.0,1.0);
+    canvas.write("default_rendering-subpixel-join-baseline.png");
+    const auto blank=DrawingTest::read_default_rendering_png(
+        "default_rendering-subpixel-join-baseline.png");
+    canvas.set_line_width(1e-8);
+    canvas.set_line_colour(1.0,0.0,0.0);
+    canvas.move_to(-0.5,0.0);
+    canvas.line_to(0.0,0.0);
+    canvas.line_to(0.0,0.5);
+    canvas.stroke();
+    canvas.write("default_rendering-subpixel-join.png");
+    const auto result=DrawingTest::read_default_rendering_png(
+        "default_rendering-subpixel-join.png");
+    DrawingTest::require(result.pixels==blank.pixels,
+                         "Subpixel join unexpectedly covered a raster sample");
+}
+
 //! \brief A valid anisotropic mapping can overflow only the vertical
 //! device-space circle radius; such a circle must be ignored safely.
 void test_anisotropic_circle_radius_overflow() {
@@ -1333,6 +1393,9 @@ int main() {
         test_segment_arithmetic_overflow();
         test_extreme_axial_strokes_on_all_sides();
         test_offscreen_miter_join_triangles();
+        test_repeated_terminal_stroke_vertex();
+        test_collinear_stroke_join();
+        test_subpixel_join_triangle();
         test_anisotropic_circle_radius_overflow();
         test_nonfinite_join_triangle_bounds();
         test_one_pixel_high_plot_labels();
