@@ -38,7 +38,6 @@ target_include_directories(rendering INTERFACE
 target_link_libraries(rendering INTERFACE utility)
 
 add_subdirectory(src)
-add_subdirectory(benchmarks)
 target_link_libraries(RENDERING_SRC PRIVATE rendering)
 
 ariadne_register_public_headers(
@@ -60,6 +59,8 @@ setup_standalone_project_tests(
         "${PROJECT_SOURCE_DIR}/include"
         "${PROJECT_SOURCE_DIR}/src"
 )
+
+setup_project_benchmarks()
 
 if(BUILD_PYTHON_BINDINGS)
     add_subdirectory(python)
