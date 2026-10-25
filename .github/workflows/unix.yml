@@ -114,3 +114,9 @@ jobs:
         run: |
           python tutorial_rendering.py
           python -c "from pathlib import Path; files=[Path('tutorial_rendering_empty.png'),Path('tutorial_rendering_cleared.png')]; assert all(p.exists() and p.read_bytes()[:8]==bytes.fromhex('89504e470d0a1a0a') for p in files), files"
+
+
+      - name: Verify Release uninstallation
+        if: matrix.build_type == 'Release'
+        working-directory: ${{ runner.workspace }}/build
+        run: cmake --build . --target uninstall
