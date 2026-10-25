@@ -106,13 +106,25 @@ struct Figure::Data
     List<RenderingObject> objects;
 };
 
-Figure::~Figure()
+Figure::~Figure() = default;
+
+Figure::Figure(Figure const& other)
+    : _data(std::make_unique<Data>(*other._data))
+{ }
+
+Figure& Figure::operator=(Figure const& other)
 {
-    delete this->_data;
+    if(this!=&other) {
+        this->_data=std::make_unique<Data>(*other._data);
+    }
+    return *this;
 }
 
+Figure::Figure(Figure&&) noexcept = default;
+Figure& Figure::operator=(Figure&&) noexcept = default;
+
 Figure::Figure(const RenderingBoundingBoxType& bbx, const Projection2d& proj)
-    : _data(new Data(bbx,proj))
+    : _data(std::make_unique<Data>(bbx,proj))
 {
     ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
 }

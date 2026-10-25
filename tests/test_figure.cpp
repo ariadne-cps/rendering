@@ -51,6 +51,7 @@ class TestRendering {
         ARIADNE_TEST_CALL(test_figure_projection())
         ARIADNE_TEST_CALL(test_figure_public_api())
         ARIADNE_TEST_CALL(test_subclassed_rendering_construction())
+        ARIADNE_TEST_CALL(test_figure_copy_move())
         ARIADNE_TEST_CALL(test_figure_edge_paths())
     }
 
@@ -281,6 +282,30 @@ class TestRendering {
         figure._paint_all(canvas);
         ARIADNE_TEST_EQUALS(canvas.x_label,StringType("horizontal"))
         ARIADNE_TEST_EQUALS(canvas.y_label,StringType("vertical"))
+    }
+
+    void test_figure_copy_move() {
+        RenderingBoundingBoxType bounds({{-1.0,1.0},{-2.0,2.0}});
+        Figure original(bounds,0,1);
+        original.set_axis_labels("x","y").set_dot_radius(3.0);
+
+        Figure copy(original);
+        copy.set_dot_radius(5.0);
+        ARIADNE_TEST_EQUALS(original.get_dot_radius(),3.0)
+        ARIADNE_TEST_EQUALS(copy.get_dot_radius(),5.0)
+
+        Figure assigned(bounds,0,1);
+        assigned=original;
+        assigned.set_line_width(7.0);
+        ARIADNE_TEST_EQUALS(original.get_line_width(),1.0)
+        ARIADNE_TEST_EQUALS(assigned.get_line_width(),7.0)
+
+        Figure moved(std::move(copy));
+        ARIADNE_TEST_EQUALS(moved.get_dot_radius(),5.0)
+
+        Figure move_assigned(bounds,0,1);
+        move_assigned=std::move(assigned);
+        ARIADNE_TEST_EQUALS(move_assigned.get_line_width(),7.0)
     }
 
     void test_figure_edge_paths() {

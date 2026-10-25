@@ -31,6 +31,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "utility/typedefs.hpp"
 #include "colour.hpp"
@@ -99,6 +100,10 @@ class Figure
 {
   public:
     ~Figure();
+    Figure(Figure const&);
+    Figure& operator=(Figure const&);
+    Figure(Figure&&) noexcept;
+    Figure& operator=(Figure&&) noexcept;
     //! Construct a figure projecting \a bbx onto the \a proj coordinates
     Figure(const RenderingBoundingBoxType& bbx, const Projection2d& proj);
     //! Construct a figure projecting \a bbx onto the (\a ix, \a iy) coordinates
@@ -186,7 +191,7 @@ class Figure
     Void _paint_all(CanvasInterface& canvas) const;
   
   private:
-    Data* _data;
+    std::unique_ptr<Data> _data;
 };
 
 
