@@ -41,6 +41,7 @@ class TestRendering {
     void test() {
         ARIADNE_TEST_CALL(test_point2d())
         ARIADNE_TEST_CALL(test_geometry2d())
+        ARIADNE_TEST_CALL(test_geometry_paths())
         ARIADNE_TEST_CALL(test_colour())
         ARIADNE_TEST_CALL(test_rendering_properties())
         ARIADNE_TEST_CALL(test_figure_header_helpers())
@@ -118,6 +119,31 @@ class TestRendering {
         ARIADNE_TEST_EQUALS(const_polytope.vertices().size(),2u)
         ARIADNE_TEST_EQUALS(const_polytope.vertex(0).x,2.0)
         ARIADNE_TEST_EQUALS(const_polytope.vertex(0).y,3.0)
+    }
+
+    void test_geometry_paths() {
+        Polytope2d single(List<Point2d>{Point2d(2.0,3.0)});
+        Polytope2d triangle(List<Point2d>{Point2d(0.0,0.0),Point2d(2.0,0.0),Point2d(0.0,2.0)});
+        NullCanvas canvas;
+        Projection2d projection(2u,0,1);
+        ARIADNE_TEST_EQUALS(single.dimension(),2u)
+        ARIADNE_TEST_EQUALS(triangle.dimension(),2u)
+        single.draw(canvas,projection);
+        triangle.draw(canvas,projection);
+        std::unique_ptr<Polytope2d> copy(triangle.clone());
+        ARIADNE_TEST_EQUALS(copy->number_of_vertices(),3u)
+        Polytope2d shifted=triangle+Vector2d(3.0,-1.0);
+        ARIADNE_TEST_EQUALS(shifted.vertex(0).x,3.0)
+        ARIADNE_TEST_EQUALS(shifted.vertex(0).y,-1.0)
+        ARIADNE_TEST_EQUALS(shifted.vertex(1).x,5.0)
+        ARIADNE_TEST_EQUALS(shifted.vertex(2).y,1.0)
+        ARIADNE_TEST_EQUALS(triangle.vertex(0).x,0.0)
+        std::ostringstream stream;
+        stream << shifted;
+        ARIADNE_TEST_ASSERT(stream.str().find("Polytope2d(boundary=")==0u)
+        DefaultRenderingCanvas filled(ImageSize2d(32u,32u));
+        filled.initialise("x","y",-1.0,5.0,-2.0,3.0);
+        filled.fill_boundary(triangle.vertices());
     }
 
     void test_colour() {
