@@ -60,8 +60,6 @@ setup_standalone_project_tests(
         "${PROJECT_SOURCE_DIR}/src"
 )
 
-setup_project_benchmarks()
-
 if(BUILD_PYTHON_BINDINGS)
     add_subdirectory(python)
 endif()
