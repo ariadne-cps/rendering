@@ -51,6 +51,7 @@ class TestRendering {
         ARIADNE_TEST_CALL(test_construct_figure())
         ARIADNE_TEST_CALL(test_figure_projection())
         ARIADNE_TEST_CALL(test_figure_public_api())
+        ARIADNE_TEST_CALL(test_figure_additional_api())
         ARIADNE_TEST_CALL(test_subclassed_rendering_construction())
         ARIADNE_TEST_CALL(test_figure_copy_move())
         ARIADNE_TEST_CALL(test_figure_edge_paths())
@@ -308,6 +309,35 @@ class TestRendering {
         figure._paint_all(canvas);
         ARIADNE_TEST_EQUALS(canvas.x_label,StringType("horizontal"))
         ARIADNE_TEST_EQUALS(canvas.y_label,StringType("vertical"))
+    }
+
+    void test_figure_additional_api() {
+        RenderingBoundingBoxType bounds({{-1.0,1.0},{-1.0,1.0}});
+        Figure figure(bounds,0,1);
+        figure.set_fill_opacity(0.375);
+        ARIADNE_TEST_EQUALS(figure.get_fill_opacity(),0.375)
+        figure.set_fill_colour(0.2,0.3,0.4);
+        ARIADNE_TEST_EQUALS(figure.get_fill_opacity(),0.375)
+        ARIADNE_TEST_EQUALS(figure.get_fill_colour().green,0.3)
+        figure.set_line_colour(0.4,0.5,0.6);
+        ARIADNE_TEST_EQUALS(figure.get_line_colour().blue,0.6)
+        TestDrawable drawable(2u);
+        figure << drawable;
+        RecordingCanvas canvas;
+        figure._paint_all(canvas);
+        figure.clear();
+        figure._paint_all(canvas);
+        ARIADNE_TEST_EQUALS(canvas.x_label,StringType("x0"))
+        ARIADNE_TEST_EQUALS(canvas.y_label,StringType("x1"))
+        draw(figure);
+        LineColour from_colour=line_colour(red);
+        LineColour from_components=line_colour(0.25,0.5,0.75);
+        FillColour fill_from_colour=fill_colour(blue);
+        FillColour fill_from_components=fill_colour(0.75,0.5,0.25);
+        ARIADNE_TEST_EQUALS(from_colour.red,1.0)
+        ARIADNE_TEST_EQUALS(from_components.blue,0.75)
+        ARIADNE_TEST_EQUALS(fill_from_colour.blue,1.0)
+        ARIADNE_TEST_EQUALS(fill_from_components.red,0.75)
     }
 
     void test_figure_copy_move() {
