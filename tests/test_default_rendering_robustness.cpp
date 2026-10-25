@@ -1019,6 +1019,30 @@ void test_subpixel_join_triangle() {
 }
 
 //! \brief A two-pixel-wide rectangle must agree with the general winding fill.
+//! \brief A miter tip above the plot must not draw in the upper margin.
+void test_top_clipped_miter_bridge() {
+    DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
+    canvas.initialise("","",-1.0,1.0,-1.0,1.0);
+    canvas.set_line_colour(1.0,0.0,0.0);
+    canvas.set_line_width(8.0);
+    // The outer triangle at the turn reaches above y=TOP=10 in
+    // device space, even though the path vertices are valid.
+    canvas.move_to(-0.3,0.8);
+    canvas.line_to(0.0,1.0);
+    canvas.line_to(0.3,0.8);
+    canvas.stroke();
+    canvas.write("default_rendering-top-clipped-miter.png");
+    const auto image=DrawingTest::read_default_rendering_png(
+        "default_rendering-top-clipped-miter.png");
+    DrawingTest::require(
+        image.pixel(224u,8u)==std::array<unsigned char,3>{255,255,255},
+        "Miter bridge painted into the upper margin");
+    DrawingTest::require(
+        DrawingTest::world_pixel(image,-0.15,0.9)==
+            std::array<unsigned char,3>{255,0,0},
+        "Visible portion of upper-edge miter stroke was not drawn");
+}
+
 //! \brief A miter bridge may extend outside the plot without colouring the margin.
 void test_left_clipped_miter_bridge() {
     DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
@@ -1451,6 +1475,7 @@ int main() {
         test_subpixel_join_triangle();
         test_narrow_full_height_rectangle();
         test_left_clipped_miter_bridge();
+        test_top_clipped_miter_bridge();
         test_anisotropic_circle_radius_overflow();
         test_nonfinite_join_triangle_bounds();
         test_one_pixel_high_plot_labels();
