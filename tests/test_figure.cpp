@@ -52,6 +52,7 @@ class TestRendering {
         ARIADNE_TEST_CALL(test_figure_projection())
         ARIADNE_TEST_CALL(test_figure_public_api())
         ARIADNE_TEST_CALL(test_figure_additional_api())
+        ARIADNE_TEST_CALL(test_figure_remaining_paths())
         ARIADNE_TEST_CALL(test_subclassed_rendering_construction())
         ARIADNE_TEST_CALL(test_figure_copy_move())
         ARIADNE_TEST_CALL(test_figure_edge_paths())
@@ -338,6 +339,23 @@ class TestRendering {
         ARIADNE_TEST_EQUALS(from_components.blue,0.75)
         ARIADNE_TEST_EQUALS(fill_from_colour.blue,1.0)
         ARIADNE_TEST_EQUALS(fill_from_components.red,0.75)
+    }
+
+    void test_figure_remaining_paths() {
+        RenderingBoundingBoxType bounds({{-1.0,1.0},{-1.0,1.0}});
+        Figure figure(bounds,0,1);
+        TestDrawable shape(2u);
+        draw(figure,static_cast<Drawable2dInterface const&>(shape));
+        figure=figure;
+        ARIADNE_TEST_EQUALS(figure.get_bounding_box().dimension(),2u)
+        figure.set_line_style(false).set_fill_style(false);
+        RecordingCanvas canvas;
+        figure._paint_all(canvas);
+        figure.write("test_figure_remaining-default.png");
+        List<Pair<Colour,Drawable2dInterface const&>> shapes{
+            Pair<Colour,Drawable2dInterface const&>(red,shape)
+        };
+        plot("test_figure_remaining-plot.png",Projection2d(2u,0,1),bounds,shapes);
     }
 
     void test_figure_copy_move() {
