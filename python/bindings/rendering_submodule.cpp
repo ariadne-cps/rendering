@@ -18,6 +18,18 @@ using namespace Ariadne;
 
 namespace {
 
+class DrawableWrapper
+    : public pybind11::wrapper<Drawable2dInterface>
+{
+  public:
+    Drawable2dInterface* clone() const override { return this->get_override("clone")(); }
+    Void draw(CanvasInterface& canvas, Projection2d const& projection) const override {
+        this->get_override("draw")(canvas,projection);
+    }
+    DimensionType dimension() const override { return this->get_override("dimension")(); }
+};
+
+
 void export_geometry(pybind11::module& module) {
     pybind11::class_<Point2d>(module,"Point2d")
         .def(pybind11::init<double,double>())
@@ -104,7 +116,10 @@ void export_properties(pybind11::module& module) {
 void export_figure(pybind11::module& module) {
     static constexpr auto reference_internal=pybind11::return_value_policy::reference_internal;
 
-    pybind11::class_<Drawable2dInterface>(module,"Drawable2d");
+    pybind11::class_<Drawable2dInterface,DrawableWrapper> drawable_class(module,"Drawable");
+    drawable_class.def("clone",&Drawable2dInterface::clone);
+    drawable_class.def("draw",&Drawable2dInterface::draw);
+    drawable_class.def("dimension",&Drawable2dInterface::dimension);
 
     pybind11::class_<Figure>(module,"Figure")
         .def(pybind11::init<RenderingBoundingBoxType const&,Projection2d const&>())
