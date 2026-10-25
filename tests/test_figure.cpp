@@ -32,8 +32,13 @@ class RecordingCanvas final : public NullCanvas {
         y_label=y;
     }
 
+    Void set_line_width(double width) override { observed_line_width=width; }
+    Void set_fill_opacity(double opacity) override { observed_fill_opacity=opacity; }
+
     StringType x_label;
     StringType y_label;
+    double observed_line_width=-1.0;
+    double observed_fill_opacity=-1.0;
 };
 
 class TestRendering {
@@ -345,12 +350,15 @@ class TestRendering {
         RenderingBoundingBoxType bounds({{-1.0,1.0},{-1.0,1.0}});
         Figure figure(bounds,0,1);
         TestDrawable shape(2u);
-        draw(figure,static_cast<Drawable2dInterface const&>(shape));
-        figure=figure;
-        ARIADNE_TEST_EQUALS(figure.get_bounding_box().dimension(),2u)
         figure.set_line_style(false).set_fill_style(false);
+        draw(figure,static_cast<Drawable2dInterface const&>(shape));
+        Figure const& same_figure=figure;
+        figure=same_figure;
+        ARIADNE_TEST_EQUALS(figure.get_bounding_box().dimension(),2u)
         RecordingCanvas canvas;
         figure._paint_all(canvas);
+        ARIADNE_TEST_EQUALS(canvas.observed_line_width,0.0)
+        ARIADNE_TEST_EQUALS(canvas.observed_fill_opacity,0.0)
         figure.write("test_figure_remaining-default.png");
         List<Pair<Colour,Drawable2dInterface const&>> shapes{
             Pair<Colour,Drawable2dInterface const&>(red,shape)
