@@ -84,8 +84,11 @@ jobs:
           cmake --build build --parallel
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $env:PATH = "${{ runner.workspace }}\install\bin;$env:PATH"
-          & ".\build\tutorial_rendering.exe"
+          # Run inside build so relative PNG paths match the Unix job and the verification below.
+          Push-Location build
+          & ".\tutorial_rendering.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Pop-Location
           python -c "from pathlib import Path; names=['layers','layers_large','cleared','projection_xy','projection_xz','plot']; files=[Path('build/tutorial_rendering_'+n+'.png') for n in names]; assert all(p.exists() and p.read_bytes()[:8]==bytes.fromhex('89504e470d0a1a0a') for p in files), files"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
