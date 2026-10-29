@@ -1,6 +1,7 @@
 # Ariadne Rendering
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Unix Status](https://github.com/ariadne-cps/rendering/actions/workflows/unix.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/unix.yml)
+ [![macOS Status](https://github.com/ariadne-cps/rendering/actions/workflows/macos.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/macos.yml)
+[![Ubuntu Status](https://github.com/ariadne-cps/rendering/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/ubuntu.yml)
 [![Windows Status](https://github.com/ariadne-cps/rendering/actions/workflows/win.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/win.yml) [![Sanitizers Status](https://github.com/ariadne-cps/rendering/actions/workflows/sanitizers.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/sanitizers.yml) [![Coverage Status](https://github.com/ariadne-cps/rendering/actions/workflows/coverage.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/coverage.yml) [![codecov](https://codecov.io/gh/ariadne-cps/rendering/branch/main/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/rendering)
 
 Rendering provides Ariadne's mathematics-independent rendering primitives, figure abstraction, backend interface, and self-contained raster PNG backend.
