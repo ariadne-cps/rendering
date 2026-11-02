@@ -1096,7 +1096,7 @@ void test_circle_generated_nonfinite_fill_vertices(Ariadne::Testing::Context& ct
 
 //! \brief On Linux, /dev/full opens successfully but rejects writes with
 //! ENOSPC. This exercises a genuine I/O failure after file creation.
-void test_png_write_failure_after_open(Ariadne::Testing::Context& ctx) {
+void test_png_write_failure_after_open([[maybe_unused]] Ariadne::Testing::Context& ctx) {
 #if defined(__linux__)
     DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
     bool rejected=false;
@@ -1112,7 +1112,7 @@ void test_png_write_failure_after_open(Ariadne::Testing::Context& ctx) {
 
 //! \brief An actual regular file can fail after opening when the
 //! process reaches a POSIX file-size limit. Exercise this on macOS too.
-void test_png_write_failure_with_file_size_limit(Ariadne::Testing::Context& ctx) {
+void test_png_write_failure_with_file_size_limit([[maybe_unused]] Ariadne::Testing::Context& ctx) {
 #if defined(__APPLE__) || defined(__linux__)
     struct rlimit saved{};
     if (::getrlimit(RLIMIT_FSIZE,&saved)!=0)
