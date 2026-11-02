@@ -5,3 +5,6 @@ endif()
 if(BUILD_PYTHON_BINDINGS AND NOT TARGET pyariadne-python-common)
     ariadne_add_submodule(python-common)
 endif()
+
+# Test-only dependency: never linked to the rendering library.
+ariadne_setup_testing()

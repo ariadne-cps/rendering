@@ -24,18 +24,14 @@
 
 #include <sstream>
 
-#include "macro/testing.hpp"
+#include "ariadne-testing.hpp"
 #include "rendering/null_rendering.hpp"
 
 using namespace Ariadne;
 
-class TestNullRendering {
+class TestNullRendering : public Ariadne::Testing::ContextFixture {
   public:
-    void test() {
-        ARIADNE_TEST_CALL(test_canvas())
-        ARIADNE_TEST_CALL(test_backend())
-    }
-
+    using ContextFixture::ContextFixture;
     void test_canvas() {
         NullCanvas canvas;
 
@@ -55,14 +51,14 @@ class TestNullRendering {
         canvas.set_fill_opacity(0.5);
         canvas.set_fill_colour(0.4, 0.5, 0.6);
         Vector2d scaling = canvas.scaling();
-        ARIADNE_TEST_EQUALS(scaling.x, 0.0)
-        ARIADNE_TEST_EQUALS(scaling.y, 0.0)
+        ARIADNE_TESTING_EXPECT_EQUAL(scaling.x, 0.0);
+        ARIADNE_TESTING_EXPECT_EQUAL(scaling.y, 0.0);
 
         Box2d bounds = canvas.bounds();
-        ARIADNE_TEST_EQUALS(bounds.xl, 0.0)
-        ARIADNE_TEST_EQUALS(bounds.xu, 0.0)
-        ARIADNE_TEST_EQUALS(bounds.yl, 0.0)
-        ARIADNE_TEST_EQUALS(bounds.yu, 0.0)
+        ARIADNE_TESTING_EXPECT_EQUAL(bounds.xl, 0.0);
+        ARIADNE_TESTING_EXPECT_EQUAL(bounds.xu, 0.0);
+        ARIADNE_TESTING_EXPECT_EQUAL(bounds.yl, 0.0);
+        ARIADNE_TESTING_EXPECT_EQUAL(bounds.yu, 0.0);
 
         canvas.write("ignored");
         canvas.finalise();
@@ -71,16 +67,16 @@ class TestNullRendering {
     void test_backend() {
         NullRenderingBackend backend;
         SharedPointer<CanvasInterface> canvas = backend.make_canvas("ignored", 640u, 480u, false);
-        ARIADNE_TEST_ASSERT(canvas)
+        ARIADNE_TESTING_PROVE(canvas);
         canvas->move_to(0.0, 0.0);
     }
 
 
 };
 
-Int main()
-{
-    TestNullRendering().test();
-
-    return ARIADNE_TEST_FAILURES;
+int main(int argc, char** argv) {
+    ARIADNE_TESTING_SUITE("null_rendering");
+    ARIADNE_TESTING_ADD_TEST(TestNullRendering, test_canvas);
+    ARIADNE_TESTING_ADD_TEST(TestNullRendering, test_backend);
+    return ARIADNE_TESTING_RUN_TESTS_WITH_ARGS(argc, argv);
 }

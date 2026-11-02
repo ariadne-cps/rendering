@@ -11,12 +11,12 @@ set(UNIT_TESTS
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
-    target_link_libraries(${TEST} PRIVATE ariadne-rendering rendering)
+    target_link_libraries(${TEST} PRIVATE ariadne-rendering rendering ariadne-testing)
     if("${TEST}" STREQUAL "test_default_rendering_regression")
         target_compile_definitions(${TEST} PRIVATE
             ARIADNE_RENDERING_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden")
     endif()
-    add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
+    add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}> --concise)
     if(WIN32)
         set_tests_properties(${TEST} PROPERTIES
             ENVIRONMENT_MODIFICATION
