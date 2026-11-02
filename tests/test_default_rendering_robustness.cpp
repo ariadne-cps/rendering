@@ -1387,6 +1387,7 @@ int main(int argc, char** argv) {
         ARIADNE_TESTING_PROVE_CTX(ctx, (image.width==234 && image.height==98));
         auto check=[&](double x,double y,PixelRGB expected,
                        const char* message) {
+            ARIADNE_TESTING_NOTE_CTX(ctx, message);
             ARIADNE_TESTING_PROVE_CTX(ctx, (DrawingTest::world_pixel(image,x,y)==expected));
         };
         check(-0.73,0.0,{247,247,247},"Transparent fill changed background");
