@@ -257,10 +257,31 @@ void verify_rectangles(DrawingTest::Image const& holes,
 
 
     void test_pixel_exact_goldens() {
+        const auto& directory=ctx().work_directory();
+        auto register_output=[&](std::string const& filename) {
+            auto path=directory/filename;
+            ctx().artifact(path, filename, "image/png",
+                           Ariadne::Testing::ArtifactKind::Output,
+                           Ariadne::Testing::ArtifactLifetime::KeepOnFailure);
+            return path;
+        };
+        auto check_golden=[&](DrawingTest::Image const& image,
+                              std::string const& name) {
+            auto const golden=std::filesystem::path(ARIADNE_RENDERING_GOLDEN_DIR)/name;
+            ctx().artifact(golden, name+" golden", "image/png",
+                           Ariadne::Testing::ArtifactKind::Reference);
+            auto const diff=directory/(name+"-golden-diff.ppm");
+            ctx().artifact(diff, name+" pixel difference", "image/x-portable-pixmap",
+                           Ariadne::Testing::ArtifactKind::Difference,
+                           Ariadne::Testing::ArtifactLifetime::KeepOnFailure);
+            ARIADNE_TESTING_EXPECT_NO_THROW(DrawingTest::require_golden_image(
+                image, name, diff.string()));
+        };
         DefaultRenderingCanvas default_rendering(ImageSize2d(320u,240u));
-        render(default_rendering,"comparison-default_rendering.png");
+        const auto figure_file=register_output("comparison-default_rendering.png");
+        render(default_rendering,figure_file.string().c_str());
         const auto figure_image=DrawingTest::read_default_rendering_png(
-            "comparison-default_rendering.png");
+            figure_file.string());
         verify_labels(figure_image);
 
         // At (329,89), 11/16 green stroke coverage over a 145 channel
@@ -276,19 +297,18 @@ void verify_rectangles(DrawingTest::Image const& holes,
             DefaultRenderingCanvas canvas(ImageSize2d(320u,240u));
             const std::string name="comparison-scene"+std::to_string(scene)+
                                    "-default_rendering.png";
-            geometry(canvas,name.c_str(),scene);
-            scenes.push_back(DrawingTest::read_default_rendering_png(name));
+            const auto output=register_output(name);
+            geometry(canvas,output.string().c_str(),scene);
+            scenes.push_back(DrawingTest::read_default_rendering_png(output.string()));
         }
 
         verify_rectangles(scenes[7],scenes[8]);
 
-        ARIADNE_TESTING_EXPECT_NO_THROW(DrawingTest::require_golden_image(
-            figure_image,"comparison-default_rendering.png"));
+        check_golden(figure_image,"comparison-default_rendering.png");
         for(int scene=0;scene<10;++scene) {
             const std::string name="comparison-scene"+std::to_string(scene)+
                                    "-default_rendering.png";
-            ARIADNE_TESTING_EXPECT_NO_THROW(DrawingTest::require_golden_image(
-                scenes[static_cast<std::size_t>(scene)],name));
+            check_golden(scenes[static_cast<std::size_t>(scene)],name);
         }
     }
 };

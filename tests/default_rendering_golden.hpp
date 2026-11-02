@@ -47,7 +47,8 @@ namespace DrawingTest {
 //! \details The fixture is always read-only. On failure a red-on-black PPM
 //! difference image is written in the test's working directory; each changed
 //! pixel is red with intensity proportional to the largest channel error.
-inline void require_golden_image(Image const& current, std::string const& filename) {
+inline void require_golden_image(Image const& current, std::string const& filename,
+                                 std::string const& difference_filename = {}) {
     const std::string path = std::string(ARIADNE_RENDERING_GOLDEN_DIR) + "/" + filename;
     const Image reference = read_default_rendering_png(path);
 
@@ -85,7 +86,8 @@ inline void require_golden_image(Image const& current, std::string const& filena
         diagnostic.push_back(0);
     }
 
-    const std::string diff_path = filename + "-golden-diff.ppm";
+    const std::string diff_path = difference_filename.empty()
+        ? filename + "-golden-diff.ppm" : difference_filename;
     if(differences == 0) {
         // Avoid confusing an old diagnostic with a fresh successful run.
         (void)std::remove(diff_path.c_str());
