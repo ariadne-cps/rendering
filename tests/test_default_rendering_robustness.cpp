@@ -47,33 +47,6 @@ namespace {
 
 using PixelRGB = std::array<unsigned char,3>;
 
-//! \brief Require the supplied operation to reject an invalid argument.
-template<class Function>
-void must_reject(Function function,const char* scenario) {
-    try {
-        function();
-    } catch(const std::invalid_argument&) {
-        return;
-    }
-    throw std::runtime_error(scenario);
-}
-
-//! \brief Signed image dimensions must fail the ImageSize2d precondition.
-template<class Function>
-void must_fail_precondition(Function function,const char* scenario) {
-    try {
-        function();
-    } catch(const std::runtime_error& error) {
-        // Other runtime failures are not evidence that the size guard ran.
-        const std::string message=error.what();
-        if(message.find("Precondition")!=std::string::npos &&
-           message.find("x > 0 && y > 0")!=std::string::npos)
-            return;
-        throw;
-    }
-    throw std::runtime_error(scenario);
-}
-
 //! \brief Append and fill a rectangular contour in plot coordinates.
 void rectangle(DefaultRenderingCanvas& canvas,double xl,double yl,
                double xu,double yu) {
@@ -124,7 +97,7 @@ void test_embedded_axis_glyphs() {
     const auto lower_image=render_label(lower,"default_rendering-lowercase.png");
     const auto upper_image=render_label(upper,"default_rendering-uppercase.png");
     verify_cells(lower_image,blank_letters,lower);
-    ARIADNE_TESTING_PROVE((lower_image.pixels==upper_image.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(lower_image.pixels, upper_image.pixels);
 
     // Digits, punctuation, whitespace and unsupported '?' fallback.
     const std::string symbols="0123456789+-.,:_/()? ";
@@ -170,7 +143,7 @@ void test_canvas_reset_and_offscreen_geometry() {
     reused.write("default_rendering-reset-and-clipped.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-reset-and-clipped.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==expected.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, expected.pixels);
 }
 
 //! \brief A five-vertex contour is not a rectangle with implicit closure.
@@ -221,7 +194,7 @@ void test_clipped_rectangles_on_all_sides() {
     canvas.write("default_rendering-clipped-all-sides.png");
     const auto clipped=DrawingTest::read_default_rendering_png(
         "default_rendering-clipped-all-sides.png");
-    ARIADNE_TESTING_PROVE((clipped.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(clipped.pixels, blank.pixels);
 }
 
 //! \brief Two overlapping rectangles must retain the nonzero winding fill.
@@ -287,7 +260,7 @@ void test_rectangle_fast_path_matches_generic_fill() {
     };
     const auto fast=render(false,"default_rendering-hole-fast.png");
     const auto generic=render(true,"default_rendering-hole-general.png");
-    ARIADNE_TESTING_PROVE((fast.pixels==generic.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(fast.pixels, generic.pixels);
 }
 
 //! \brief Empty, two-point and collinear contours never cover an area.
@@ -310,7 +283,7 @@ void test_degenerate_fills_leave_pixels_unchanged() {
     canvas.write("default_rendering-degenerate-fills.png");
     const auto image=DrawingTest::read_default_rendering_png(
         "default_rendering-degenerate-fills.png");
-    ARIADNE_TESTING_PROVE((image.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(image.pixels, blank.pixels);
 }
 
 //! \brief Distinct paint colours retain their values after cache eviction.
@@ -356,7 +329,7 @@ void test_subpixel_empty_rectangle() {
     canvas.write("default_rendering-subpixel-empty.png");
     const auto image=DrawingTest::read_default_rendering_png(
         "default_rendering-subpixel-empty.png");
-    ARIADNE_TESTING_PROVE((image.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(image.pixels, blank.pixels);
 }
 
 //! \brief Overflowed device-space circle geometry is ignored.
@@ -374,7 +347,7 @@ void test_overflowed_circle_geometry() {
     canvas.write("default_rendering-overflow-circle.png");
     const auto image=DrawingTest::read_default_rendering_png(
         "default_rendering-overflow-circle.png");
-    ARIADNE_TESTING_PROVE((image.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(image.pixels, blank.pixels);
 }
 
 //! \brief Non-finite paint channels and opacity have defined, safe semantics.
@@ -444,7 +417,7 @@ void test_clipped_strokes_outside_plot() {
     canvas.write("default_rendering-stroke-offscreen.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-stroke-offscreen.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief Filling across every boundary is equivalent to filling its clip.
@@ -461,7 +434,7 @@ void test_clipped_rectangle_matches_plot_bounds() {
     };
     const auto clipped=render(-3.0,3.0,"default_rendering-rectangle-overflow.png");
     const auto bounded=render(-1.0,1.0,"default_rendering-rectangle-bounded.png");
-    ARIADNE_TESTING_PROVE((clipped.pixels==bounded.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(clipped.pixels, bounded.pixels);
 }
 
 //! \brief A near-reversing stroke must obey the bounded miter limit.
@@ -511,7 +484,7 @@ void test_rectangle_recognition_rejects_degenerate_contours() {
     canvas.write("default_rendering-rectangle-degenerate.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-rectangle-degenerate.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief Non-axis quadrilaterals and mixed subpaths use the general filler.
@@ -576,7 +549,7 @@ void test_empty_and_nonfinite_strokes() {
     canvas.write("default_rendering-empty-stroke.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-empty-stroke.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief General scanline spans outside either horizontal clip boundary
@@ -602,7 +575,7 @@ void test_offscreen_generic_fill_spans() {
     canvas.write("default_rendering-offscreen-spans.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-offscreen-spans.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief Finite extreme stroke widths must not overflow the axial fast path
@@ -626,7 +599,7 @@ void test_extreme_axial_stroke_clipping() {
     canvas.write("default_rendering-extreme-stroke.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-extreme-stroke.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief Long labels may cross both raster bounds, but never the plot.
@@ -669,7 +642,7 @@ void test_zero_length_strokes_are_empty() {
     canvas.write("default_rendering-zero-strokes.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-zero-strokes.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief A slanted quadrilateral must use nonzero-winding rasterisation.
@@ -765,7 +738,7 @@ void test_extreme_thin_triangle_fill() {
     canvas.write("default_rendering-thin-triangle.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-thin-triangle.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief Repeating a consecutive vertex does not change a triangle fill.
@@ -806,7 +779,7 @@ void test_subnormal_rectangle_cross_underflow() {
     canvas.write("default_rendering-underflow-rectangle.png");
     const auto result=DrawingTest::read_default_rendering_png(
         "default_rendering-underflow-rectangle.png");
-    ARIADNE_TESTING_PROVE((result.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(result.pixels, blank.pixels);
 }
 
 //! \brief Separate overflow in a segment's squared length from overflow
@@ -836,7 +809,7 @@ void test_segment_arithmetic_overflow() {
     canvas.write("default_rendering-segment-overflows.png");
     const auto image=DrawingTest::read_default_rendering_png(
         "default_rendering-segment-overflows.png");
-    ARIADNE_TESTING_PROVE((image.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(image.pixels, blank.pixels);
 }
 
 //! \brief Finite axial segments can overflow each rectangle bound while
@@ -863,7 +836,7 @@ void test_extreme_axial_strokes_on_all_sides() {
     canvas.write("default_rendering-axial-extreme-four-sides.png");
     const auto image=DrawingTest::read_default_rendering_png(
         "default_rendering-axial-extreme-four-sides.png");
-    ARIADNE_TESTING_PROVE((image.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(image.pixels, blank.pixels);
 }
 
 //! \brief Offscreen joins exercise triangular clipping in four directions.
@@ -889,7 +862,7 @@ void test_offscreen_miter_join_triangles() {
     canvas.write("default_rendering-offscreen-miter-joins.png");
     const auto image=DrawingTest::read_default_rendering_png(
         "default_rendering-offscreen-miter-joins.png");
-    ARIADNE_TESTING_PROVE((image.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(image.pixels, blank.pixels);
 }
 
 //! \\brief An endpoint repeated after a segment is geometrically inert.
@@ -908,7 +881,7 @@ void test_repeated_terminal_stroke_vertex() {
     };
     const auto ordinary=render(false,"default_rendering-terminal-stroke.png");
     const auto repeated=render(true,"default_rendering-repeated-terminal-stroke.png");
-    ARIADNE_TESTING_PROVE((repeated.pixels==ordinary.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(repeated.pixels, ordinary.pixels);
 }
 
 //! \\brief A straight join has no extra miter or paint.
@@ -927,7 +900,7 @@ void test_collinear_stroke_join() {
     };
     const auto ordinary=render(false,"default_rendering-unsplit-stroke.png");
     const auto split=render(true,"default_rendering-collinear-stroke.png");
-    ARIADNE_TESTING_PROVE((split.pixels==ordinary.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(split.pixels, ordinary.pixels);
 }
 
 //! \\brief A finite miter bridge smaller than one sample remains invisible.
@@ -946,7 +919,7 @@ void test_subpixel_join_triangle() {
     canvas.write("default_rendering-subpixel-join.png");
     const auto result=DrawingTest::read_default_rendering_png(
         "default_rendering-subpixel-join.png");
-    ARIADNE_TESTING_PROVE((result.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(result.pixels, blank.pixels);
 }
 
 //! \brief A two-pixel-wide rectangle must agree with the general winding fill.
@@ -1007,7 +980,7 @@ void test_narrow_full_height_rectangle() {
     };
     const auto rectangle_image=render(false,"default_rendering-narrow-rectangle.png");
     const auto polygon_image=render(true,"default_rendering-narrow-polygon.png");
-    ARIADNE_TESTING_PROVE((rectangle_image.pixels==polygon_image.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(rectangle_image.pixels, polygon_image.pixels);
     ARIADNE_TESTING_PROVE((DrawingTest::world_pixel(rectangle_image,-0.234375,0.0)==
             PixelRGB{255,0,0}));
     ARIADNE_TESTING_PROVE((DrawingTest::world_pixel(rectangle_image,-0.3125,0.0)==
@@ -1031,7 +1004,7 @@ void test_anisotropic_circle_radius_overflow() {
     canvas.write("default_rendering-anisotropic-radius.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-anisotropic-radius.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief Join vertices can overflow in each coordinate direction even
@@ -1059,7 +1032,7 @@ void test_nonfinite_join_triangle_bounds() {
     canvas.write("default_rendering-nonfinite-join-bounds.png");
     const auto actual=DrawingTest::read_default_rendering_png(
         "default_rendering-nonfinite-join-bounds.png");
-    ARIADNE_TESTING_PROVE((actual.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(actual.pixels, blank.pixels);
 }
 
 //! \brief A one-pixel plot can put the lower tick label partly above the
@@ -1095,7 +1068,7 @@ void test_circle_generated_nonfinite_fill_vertices() {
     canvas.write("default_rendering-overflow-fill-vertices.png");
     const auto image=DrawingTest::read_default_rendering_png(
         "default_rendering-overflow-fill-vertices.png");
-    ARIADNE_TESTING_PROVE((image.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(image.pixels, blank.pixels);
 }
 
 //! \brief On Linux, /dev/full opens successfully but rejects writes with
@@ -1103,14 +1076,8 @@ void test_circle_generated_nonfinite_fill_vertices() {
 void test_png_write_failure_after_open() {
 #if defined(__linux__)
     DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
-    bool rejected=false;
-    try {
-        canvas.write("/dev/full");
-    } catch(const std::runtime_error& error) {
-        rejected=std::string(error.what()).find(
-            "Unable to write default rendering PNG")!=std::string::npos;
-    }
-    ARIADNE_TESTING_PROVE((rejected));
+    ARIADNE_TESTING_EXPECT_THROWS_MESSAGE(std::runtime_error,
+        canvas.write("/dev/full"), "Unable to write default rendering PNG");
 #endif
 }
 
@@ -1143,15 +1110,9 @@ void test_png_write_failure_with_file_size_limit() {
 
     DefaultRenderingCanvas canvas(ImageSize2d(128u,96u));
     const char* filename="default_rendering-size-limit.png";
-    bool rejected=false;
-    try {
-        canvas.write(filename);
-    } catch(const std::runtime_error& error) {
-        rejected=std::string(error.what()).find(
-            "Unable to write default rendering PNG")!=std::string::npos;
-    }
+    ARIADNE_TESTING_EXPECT_THROWS_MESSAGE(std::runtime_error,
+        canvas.write(filename), "Unable to write default rendering PNG");
     std::remove(filename);
-    ARIADNE_TESTING_PROVE((rejected));
 #endif
 }
 
@@ -1210,83 +1171,113 @@ void test_overflowed_finite_scanline_crossings() {
     canvas.write("default_rendering-finite-crossing-overflow.png");
     const auto result=DrawingTest::read_default_rendering_png(
         "default_rendering-finite-crossing-overflow.png");
-    ARIADNE_TESTING_PROVE((result.pixels==blank.pixels));
+    ARIADNE_TESTING_EXPECT_RANGES(result.pixels, blank.pixels);
 }
 
     void test_raster_robustness() {
        // Invalid dimensions must be rejected before any margin arithmetic
         // or potentially huge raster-buffer allocation.
-        must_reject([] {
+        ARIADNE_TESTING_NOTE("zero plot width accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([] {
             DefaultRenderingCanvas canvas(ImageSize2d(0u,8u));
-        },"zero plot width accepted");
-        must_reject([] {
+        })());
+        ARIADNE_TESTING_NOTE("zero plot height accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([] {
             DefaultRenderingCanvas canvas(ImageSize2d(8u,0u));
-        },"zero plot height accepted");
-        must_reject([] {
+        })());
+        ARIADNE_TESTING_NOTE("excessive plot height accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([] {
             DefaultRenderingCanvas canvas(ImageSize2d(8u,16385u));
-        },"excessive plot height accepted");
-        must_fail_precondition([] {
+        })());
+        ARIADNE_TESTING_NOTE("negative signed plot width accepted");
+        ARIADNE_TESTING_EXPECT_THROWS_PAYLOAD(std::runtime_error,
+            ([] {
             const ImageSize2d invalid(-1,8);
             (void)invalid;
-        },"negative signed plot width accepted");
-        must_fail_precondition([] {
+        })(),
+            ([](std::runtime_error const& error) {
+                const std::string message=error.what();
+                return message.find("Precondition")!=std::string::npos &&
+                       message.find("x > 0 && y > 0")!=std::string::npos;
+            }), true);
+        ARIADNE_TESTING_NOTE("negative signed plot height accepted");
+        ARIADNE_TESTING_EXPECT_THROWS_PAYLOAD(std::runtime_error,
+            ([] {
             const ImageSize2d invalid(8,-1);
             (void)invalid;
-        },"negative signed plot height accepted");
+        })(),
+            ([](std::runtime_error const& error) {
+                const std::string message=error.what();
+                return message.find("Precondition")!=std::string::npos &&
+                       message.find("x > 0 && y > 0")!=std::string::npos;
+            }), true);
         // The signed overload must also accept valid dimensions and preserve
         // both coordinates, instead of merely rejecting invalid inputs.
         const ImageSize2d valid_signed_size(Int(13),Int(29));
         ARIADNE_TESTING_PROVE((valid_signed_size.nx==Nat(13) && valid_signed_size.ny==Nat(29)));
-        must_reject([] {
+        ARIADNE_TESTING_NOTE("huge plot width accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([] {
             DefaultRenderingCanvas canvas(ImageSize2d(
                 std::numeric_limits<Nat>::max(),8u));
-        },"huge plot width accepted");
-        must_reject([] {
+        })());
+        ARIADNE_TESTING_NOTE("excessive raster area accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([] {
             DefaultRenderingCanvas canvas(ImageSize2d(12000u,12000u));
-        },"excessive raster area accepted");
+        })());
 
         DefaultRenderingCanvas canvas(ImageSize2d(64u,48u));
         const double nan_axes=std::numeric_limits<double>::quiet_NaN();
         const double infinite_axes=std::numeric_limits<double>::infinity();
-        must_reject([&] {
+        ARIADNE_TESTING_NOTE("NaN upper x axis endpoint accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",-1,nan_axes,-1,1);
-        },"NaN upper x axis endpoint accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("Infinite upper y axis endpoint accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",-1,1,-1,infinite_axes);
-        },"Infinite upper y axis endpoint accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("Empty y interval accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",-1,1,1,1);
-        },"Empty y interval accepted");
+        })());
 
         const auto drawing_size=canvas.size_in_pixels();
         ARIADNE_TESTING_PROVE((drawing_size.nx==64u && drawing_size.ny==48u));
         const double nan=std::numeric_limits<double>::quiet_NaN();
         const double nonfinite_coordinate=std::numeric_limits<double>::infinity();
         const double tiny=std::numeric_limits<double>::denorm_min();
-        must_reject([&] {
+        ARIADNE_TESTING_NOTE("empty x interval accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",0,0,-1,1);
-        },"empty x interval accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("reversed x interval accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",1,-1,-1,1);
-        },"reversed x interval accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("NaN endpoint accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",nan,1,-1,1);
-        },"NaN endpoint accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("infinite endpoint accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",-1,1,-nonfinite_coordinate,1);
-        },"infinite endpoint accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("overflowing x interval accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",-1e308,1e308,-1,1);
-        },"overflowing x interval accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("overflowing y interval accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",-1,1,-1e308,1e308);
-        },"overflowing y interval accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("non-finite x scale accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",0,tiny,-1,1);
-        },"non-finite x scale accepted");
-        must_reject([&] {
+        })());
+        ARIADNE_TESTING_NOTE("non-finite y scale accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] {
             canvas.initialise("x","y",-1,1,0,tiny);
-        },"non-finite y scale accepted");
+        })());
 
         // The failed initializations must not prevent normal drawing.
         canvas.initialise("x","y",-1,1,-1,1);
@@ -1325,62 +1316,13 @@ void test_overflowed_finite_scanline_crossings() {
         canvas.stroke();
 
         // Invalid PNG destinations must report failure.
-        must_reject([&] { canvas.write(nullptr); },
-                    "Null PNG filename accepted");
-        bool rejected_missing_directory=false;
-        try {
-            canvas.write("default_rendering_missing_parent/invalid.png");
-        } catch(const std::runtime_error&) {
-            rejected_missing_directory=true;
-        }
-        ARIADNE_TESTING_PROVE((rejected_missing_directory));
+        ARIADNE_TESTING_NOTE("Null PNG filename accepted");
+        ARIADNE_TESTING_EXPECT_THROWS(std::invalid_argument, ([&] { canvas.write(nullptr); })());
+        ARIADNE_TESTING_EXPECT_THROWS(std::runtime_error,
+            canvas.write("default_rendering_missing_parent/invalid.png"));
 
-        test_embedded_axis_glyphs();
-        test_canvas_reset_and_offscreen_geometry();
-        test_nonrectangular_five_vertex_fill();
-        test_clipped_rectangles_on_all_sides();
-        test_overlapping_rectangular_contours();
-        test_rectangle_fast_path_matches_generic_fill();
-        test_degenerate_fills_leave_pixels_unchanged();
-        test_paint_cache_survives_eviction();
-        test_subpixel_empty_rectangle();
-        test_overflowed_circle_geometry();
-        test_nonfinite_paint_values();
-        test_line_to_without_move_to();
-        test_clipped_strokes_outside_plot();
-        test_clipped_rectangle_matches_plot_bounds();
-        test_acute_stroke_miter_limit();
-        test_rectangle_recognition_rejects_degenerate_contours();
-        test_mixed_nonrectangular_contours();
-        test_same_rgb_different_opacity();
-        test_empty_and_nonfinite_strokes();
-        test_offscreen_generic_fill_spans();
-        test_extreme_axial_stroke_clipping();
-        test_long_axis_labels_clip_safely();
-        test_zero_length_strokes_are_empty();
-        test_slanted_quadrilateral_fill();
-        test_uninitialised_canvas_fill_and_reset();
-        test_slanted_quadrilateral_edge_orientations();
-        test_extreme_thin_triangle_fill();
-        test_duplicate_consecutive_vertices_preserve_fill();
-        test_subnormal_rectangle_cross_underflow();
-        test_segment_arithmetic_overflow();
-        test_extreme_axial_strokes_on_all_sides();
-        test_offscreen_miter_join_triangles();
-        test_repeated_terminal_stroke_vertex();
-        test_collinear_stroke_join();
-        test_subpixel_join_triangle();
-        test_narrow_full_height_rectangle();
-        test_left_clipped_miter_bridge();
-        test_top_clipped_miter_bridge();
-        test_anisotropic_circle_radius_overflow();
-        test_nonfinite_join_triangle_bounds();
-        test_one_pixel_high_plot_labels();
-        test_circle_generated_nonfinite_fill_vertices();
-        test_png_write_failure_after_open();
-        test_png_write_failure_with_file_size_limit();
-        test_valid_large_axis_translations();
-        test_overflowed_finite_scanline_crossings();
+        // Other raster scenarios are reported independently.
+
         canvas.write("default_rendering-robustness.png");
         const auto image=DrawingTest::read_default_rendering_png(
             "default_rendering-robustness.png");
@@ -1406,5 +1348,55 @@ void test_overflowed_finite_scanline_crossings() {
 int main(int argc, char** argv) {
     ARIADNE_TESTING_SUITE("default_rendering_robustness");
     ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_raster_robustness);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_embedded_axis_glyphs);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_canvas_reset_and_offscreen_geometry);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_nonrectangular_five_vertex_fill);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_clipped_rectangles_on_all_sides);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_overlapping_rectangular_contours);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_rectangle_fast_path_matches_generic_fill);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_degenerate_fills_leave_pixels_unchanged);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_paint_cache_survives_eviction);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_subpixel_empty_rectangle);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_overflowed_circle_geometry);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_nonfinite_paint_values);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_line_to_without_move_to);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_clipped_strokes_outside_plot);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_clipped_rectangle_matches_plot_bounds);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_acute_stroke_miter_limit);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_rectangle_recognition_rejects_degenerate_contours);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_mixed_nonrectangular_contours);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_same_rgb_different_opacity);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_empty_and_nonfinite_strokes);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_offscreen_generic_fill_spans);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_extreme_axial_stroke_clipping);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_long_axis_labels_clip_safely);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_zero_length_strokes_are_empty);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_slanted_quadrilateral_fill);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_uninitialised_canvas_fill_and_reset);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_slanted_quadrilateral_edge_orientations);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_extreme_thin_triangle_fill);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_duplicate_consecutive_vertices_preserve_fill);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_subnormal_rectangle_cross_underflow);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_segment_arithmetic_overflow);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_extreme_axial_strokes_on_all_sides);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_offscreen_miter_join_triangles);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_repeated_terminal_stroke_vertex);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_collinear_stroke_join);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_subpixel_join_triangle);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_narrow_full_height_rectangle);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_left_clipped_miter_bridge);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_top_clipped_miter_bridge);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_anisotropic_circle_radius_overflow);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_nonfinite_join_triangle_bounds);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_one_pixel_high_plot_labels);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_circle_generated_nonfinite_fill_vertices);
+#if defined(__linux__)
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_png_write_failure_after_open);
+#endif
+#if defined(__APPLE__) || defined(__linux__)
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_png_write_failure_with_file_size_limit);
+#endif
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_valid_large_axis_translations);
+    ARIADNE_TESTING_ADD_TEST(TestDefaultRenderingRobustness, test_overflowed_finite_scanline_crossings);
     return ARIADNE_TESTING_RUN_TESTS_WITH_ARGS(argc, argv);
 }
