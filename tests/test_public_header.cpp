@@ -9,10 +9,11 @@
 
 using namespace Ariadne;
 
-int main(int argc, char** argv)
-{
-    Ariadne::Testing::Suite suite("public_header");
-    suite.add("public umbrella header", [](Ariadne::Testing::Context& ctx) {
+class TestPublicHeader : public Ariadne::Testing::ContextFixture {
+  public:
+    using ContextFixture::ContextFixture;
+
+    void test_public_api() {
     RenderingBox box({{-1.0,1.0},{-2.0,2.0}});
     Figure figure(box,Projection2d(2u,0u,1u));
     figure.set_line_colour(red).set_fill_colour(blue);
@@ -29,14 +30,19 @@ int main(int argc, char** argv)
     Point2d position(0.0,0.0);
     position+=Vector2d(1.0,2.0);
 
-    ARIADNE_TESTING_EXPECT_EQUAL_CTX(ctx, box.dimension(), 2u);
-    ARIADNE_TESTING_EXPECT_EQUAL_CTX(ctx, figure.get_bounding_box().dimension(), 2u);
-    ARIADNE_TESTING_EXPECT_EQUAL_CTX(ctx, size.nx, 32u);
-    ARIADNE_TESTING_EXPECT_EQUAL_CTX(ctx, size.ny, 32u);
-    ARIADNE_TESTING_EXPECT_EQUAL_CTX(ctx, position.x, 1.0);
-    ARIADNE_TESTING_EXPECT_EQUAL_CTX(ctx, position.y, 2.0);
-    ARIADNE_TESTING_PROVE_CTX(ctx, static_cast<bool>(default_canvas));
-    ARIADNE_TESTING_PROVE_CTX(ctx, static_cast<bool>(empty_canvas));
-    });
-    return Ariadne::Testing::run_suite(suite, argc, argv);
+    ARIADNE_TESTING_EXPECT_EQUAL(box.dimension(), 2u);
+    ARIADNE_TESTING_EXPECT_EQUAL(figure.get_bounding_box().dimension(), 2u);
+    ARIADNE_TESTING_EXPECT_EQUAL(size.nx, 32u);
+    ARIADNE_TESTING_EXPECT_EQUAL(size.ny, 32u);
+    ARIADNE_TESTING_EXPECT_EQUAL(position.x, 1.0);
+    ARIADNE_TESTING_EXPECT_EQUAL(position.y, 2.0);
+    ARIADNE_TESTING_PROVE(static_cast<bool>(default_canvas));
+    ARIADNE_TESTING_PROVE(static_cast<bool>(empty_canvas));
+    }
+};
+
+int main(int argc, char** argv) {
+    ARIADNE_TESTING_SUITE("public_header");
+    ARIADNE_TESTING_ADD_TEST(TestPublicHeader, test_public_api);
+    return ARIADNE_TESTING_RUN_TESTS_WITH_ARGS(argc, argv);
 }
