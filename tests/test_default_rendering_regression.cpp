@@ -36,6 +36,7 @@
 #include "rendering/default_rendering.hpp"
 #include "default_rendering_png.hpp"
 #include "default_rendering_golden.hpp"
+#include "ariadne-testing.hpp"
 
 
 using namespace Ariadne;
@@ -209,8 +210,8 @@ static void geometry(CanvasInterface& c, const char* filename, int scene) {
 
 
 //! \brief Check that axis text remains legible in the generated PNG.
-static void verify_labels(DrawingTest::Image const& image) {
-    using DrawingTest::require;
+static void verify_labels(Ariadne::Testing::Context& ctx, DrawingTest::Image const& image) {
+    
     auto dark=[&](int x0,int y0,int x1,int y1) {
         unsigned count=0;
         for(int y=y0;y<y1;++y) for(int x=x0;x<x1;++x) {
@@ -224,24 +225,22 @@ static void verify_labels(DrawingTest::Image const& image) {
     const int height=static_cast<int>(image.height);
     const int plot_height=height-50;
     const int x_center=160+(width-170)/2;
-    require(dark(x_center-25,height-37,x_center+15,height-2)>=45,
-            "Horizontal axis label is not legible");
-    require(dark(125,10+plot_height/2-4,159,10+plot_height/2+36)>=65,
-            "Vertical axis label is not legible");
-    require(dark(127,8,158,45)>=45,"Upper numeric axis label is not legible");
+    ARIADNE_TESTING_PROVE_CTX(ctx, (dark(x_center-25,height-37,x_center+15,height-2)>=45));
+    ARIADNE_TESTING_PROVE_CTX(ctx, (dark(125,10+plot_height/2-4,159,10+plot_height/2+36)>=65));
+    ARIADNE_TESTING_PROVE_CTX(ctx, (dark(127,8,158,45)>=45));
 }
 
 //! \brief Check rectangular compound-path winding semantics.
-static void verify_rectangles(DrawingTest::Image const& holes,
+static void verify_rectangles(Ariadne::Testing::Context& ctx, DrawingTest::Image const& holes,
                                DrawingTest::Image const& mixed) {
-    using DrawingTest::require;
-    auto expect=[](DrawingTest::Image const& image,double x,double y,bool filled) {
+    
+    auto expect=[&](DrawingTest::Image const& image,double x,double y,bool filled) {
         const auto colour=DrawingTest::world_pixel(image,x,y);
         const bool actual=colour[1]<210 && colour[2]<210;
-        DrawingTest::require(actual==filled,"Rectangular winding mismatch");
+        ARIADNE_TESTING_PROVE_CTX(ctx, (actual==filled));
     };
-    require(holes.width==490 && holes.height==290,"Scene dimensions changed");
-    require(mixed.width==490 && mixed.height==290,"Scene dimensions changed");
+    ARIADNE_TESTING_PROVE_CTX(ctx, (holes.width==490 && holes.height==290));
+    ARIADNE_TESTING_PROVE_CTX(ctx, (mixed.width==490 && mixed.height==290));
     for(const double x:{-0.66,-0.03,0.62}) expect(holes,x,0,false);
     expect(holes,-0.91,0,true);
     expect(holes,-0.28,0,true);
@@ -253,18 +252,18 @@ static void verify_rectangles(DrawingTest::Image const& holes,
 }
 
 
-int main() {
-    try {
+int main(int argc, char** argv) {
+    Ariadne::Testing::Suite suite("default_rendering_regression");
+    suite.add("pixel-exact golden regression", [](Ariadne::Testing::Context& ctx) {
         DefaultRenderingCanvas default_rendering(ImageSize2d(320u,240u));
         render(default_rendering,"comparison-default_rendering.png");
         const auto figure_image=DrawingTest::read_default_rendering_png(
             "comparison-default_rendering.png");
-        verify_labels(figure_image);
+        verify_labels(ctx, figure_image);
 
         // At (329,89), 11/16 green stroke coverage over a 145 channel
         // and a 153 source gives exactly 150.5; rounding must yield 151.
-        DrawingTest::require(figure_image.pixel(329u,89u)[1]==151u,
-                             "Halfway alpha composite rounded inconsistently");
+        ARIADNE_TESTING_PROVE_CTX(ctx, (figure_image.pixel(329u,89u)[1]==151u));
 
         // Generate and decode every scene before comparing any golden fixture.
         // A golden mismatch must not prevent collecting the other images for
@@ -279,19 +278,16 @@ int main() {
             scenes.push_back(DrawingTest::read_default_rendering_png(name));
         }
 
-        verify_rectangles(scenes[7],scenes[8]);
+        verify_rectangles(ctx, scenes[7],scenes[8]);
 
-        DrawingTest::require_golden_image(
-            figure_image,"comparison-default_rendering.png");
+        ARIADNE_TESTING_EXPECT_NO_THROW_CTX(ctx, DrawingTest::require_golden_image(
+            figure_image,"comparison-default_rendering.png"));
         for(int scene=0;scene<10;++scene) {
             const std::string name="comparison-scene"+std::to_string(scene)+
                                    "-default_rendering.png";
-            DrawingTest::require_golden_image(
-                scenes[static_cast<std::size_t>(scene)],name);
+            ARIADNE_TESTING_EXPECT_NO_THROW_CTX(ctx, DrawingTest::require_golden_image(
+                scenes[static_cast<std::size_t>(scene)],name));
         }
-        return 0;
-    } catch(std::exception const& error) {
-        std::cerr<<"default rendering regression: "<<error.what()<<'\n';
-        return 1;
-    }
+    });
+    return Ariadne::Testing::run_suite(suite, argc, argv);
 }
