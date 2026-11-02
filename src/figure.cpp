@@ -24,7 +24,7 @@
 
 #include "utility/standard.hpp"
 
-#include "macro/general.hpp"
+#include "utility/macros.hpp"
 #include "utility/stlio.hpp"
 #include "utility/string.hpp"
 #include "rendering/geometry2d.hpp"
