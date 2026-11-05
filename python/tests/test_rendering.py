@@ -1,4 +1,4 @@
-import pyariadne as rendering
+import pyariadne_rendering as rendering
 
 
 def test_rendering_primitives():

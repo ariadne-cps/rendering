@@ -26,5 +26,6 @@ target_include_directories(pyariadne-rendering INTERFACE
 
 ariadne_add_python_module(
     NAME rendering
+    MODULE_IMPORT_NAME pyariadne_rendering
     MODULE_SOURCE rendering_module.cpp
 )

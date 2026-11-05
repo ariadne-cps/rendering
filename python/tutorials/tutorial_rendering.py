@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Standalone rendering tutorial: no geometry or drawing bindings required."""
 
-from pyariadne import (
+from pyariadne_rendering import (
     Colour, RenderingProperties, RenderingManager, DefaultRenderingBackend,
     RenderingBox, Projection2d, Figure, Point2d, ImageSize2d, black, green
 )

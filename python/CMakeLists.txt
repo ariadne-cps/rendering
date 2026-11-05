@@ -21,7 +21,7 @@ if(Python3_FOUND)
     add_subdirectory(bindings)
 
     if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-        ariadne_finalize_python_module(NAME rendering)
+        ariadne_finalize_python_module(NAME rendering MODULE_IMPORT_NAME pyariadne_rendering)
 
         set(PYTHON_BINDINGS_INSTALL_DIR "${Python3_SITEARCH}"
             CACHE STRING "Install destination for Python targets")

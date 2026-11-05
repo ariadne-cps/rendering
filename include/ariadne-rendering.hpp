@@ -1,6 +1,8 @@
 #ifndef ARIADNE_RENDERING_MODULE_HPP
 #define ARIADNE_RENDERING_MODULE_HPP
 
+#include "ariadne-utility.hpp"
+
 #include "rendering/colour.hpp"
 #include "rendering/image_size.hpp"
 #include "rendering/rendering_box.hpp"
