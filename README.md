@@ -5,8 +5,9 @@
 [![Windows Status](https://github.com/ariadne-cps/rendering/actions/workflows/win.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/win.yml) [![Sanitizers Status](https://github.com/ariadne-cps/rendering/actions/workflows/sanitizers.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/sanitizers.yml) [![Coverage Status](https://github.com/ariadne-cps/rendering/actions/workflows/coverage.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/coverage.yml) [![codecov](https://codecov.io/gh/ariadne-cps/rendering/branch/main/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/rendering)
 
 Rendering provides Ariadne's mathematics-independent rendering primitives, figure abstraction, backend interface, and self-contained raster PNG backend.
+Although independently maintained and usable, this repository is also part of the [Ariadne repository structure](https://github.com/ariadne-cps/ariadne/blob/main/doc/structure.md).
 
-Its only Ariadne runtime dependency is [ariadne-cps/utility](https://github.com/ariadne-cps/utility). Build configuration is shared through [ariadne-cps/configuration](https://github.com/ariadne-cps/configuration). Optional Python bindings use [ariadne-cps/python-common](https://github.com/ariadne-cps/python-common).
+Its only Ariadne runtime dependency is [ariadne-cps/utility](https://github.com/ariadne-cps/utility). Build configuration is shared through [ariadne-cps/build](https://github.com/ariadne-cps/build). Optional Python bindings use [ariadne-cps/python-common](https://github.com/ariadne-cps/python-common).
 
 The repository deliberately does not depend on numeric, interval, algebra, function, geometry, solving, or drawing modules. Mathematical objects are adapted to rendering by higher-level repositories.
 
