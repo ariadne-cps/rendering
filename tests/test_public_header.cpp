@@ -26,14 +26,14 @@ class TestPublicHeader : public Ariadne::Testing::ContextFixture {
     NullRenderingBackend null_backend;
     auto empty_canvas=null_backend.make_canvas("unused.png",32u,32u,false);
 
-    ImageSize2d size(32u,32u);
+    ImageSize2d image_size(32u,32u);
     Point2d position(0.0,0.0);
     position+=Vector2d(1.0,2.0);
 
     ARIADNE_TESTING_EXPECT_EQUAL(box.dimension(), 2u);
     ARIADNE_TESTING_EXPECT_EQUAL(figure.get_bounding_box().dimension(), 2u);
-    ARIADNE_TESTING_EXPECT_EQUAL(size.nx, 32u);
-    ARIADNE_TESTING_EXPECT_EQUAL(size.ny, 32u);
+    ARIADNE_TESTING_EXPECT_EQUAL(image_size.nx, 32u);
+    ARIADNE_TESTING_EXPECT_EQUAL(image_size.ny, 32u);
     ARIADNE_TESTING_EXPECT_EQUAL(position.x, 1.0);
     ARIADNE_TESTING_EXPECT_EQUAL(position.y, 2.0);
     ARIADNE_TESTING_PROVE(static_cast<bool>(default_canvas));
