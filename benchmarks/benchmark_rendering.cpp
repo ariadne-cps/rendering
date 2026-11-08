@@ -418,8 +418,6 @@ int main(int argc,const char* argv[]) {
         Bench::CommandLine cli;
         cli.add(CommandLineContribution("rendering-benchmark",benchmark_parsers(opts)));
         if(!cli.acquire(argc,argv))return 0;
-        if(ThreadManager::instance().concurrency()!=0u)
-            throw std::invalid_argument("rendering benchmark requires --concurrency 0");
         validate_options(opts);
         Bench::Runner runner(cli,opts.scene=="all"?6u:1u);
         // All input geometry is prepared outside the measured rendering.
