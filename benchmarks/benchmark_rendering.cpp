@@ -31,24 +31,19 @@
 // is included in the measured rendering time.
 
 #include "rendering/default_rendering.hpp"
+#include "ariadne-benchmarking.hpp"
 
-#include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace Ariadne;
+namespace Bench=Ariadne::Benchmarking;
 
 namespace {
-
-using Clock = std::chrono::steady_clock;
 constexpr double pi = 3.14159265358979323846;
 
 //! \brief A replayable canvas command, prepared before timing.
@@ -87,75 +82,53 @@ struct Scene {
     }
 };
 
-//! \brief Validated benchmark configuration from the Ariadne CLI.
 struct Options {
-    unsigned width=640, height=480;
-    unsigned iterations=5, warmup=1;
-    std::string scene="all", png_prefix="benchmark-drawing";
-    bool write_png=false;
-    bool breakdown=false;
+    unsigned width=640u,height=480u,iterations=5u;
+    std::string scene="all",png_prefix="benchmark-drawing";
+    bool write_png=false,breakdown=false;
 };
 
-unsigned positive_integer(std::string const& text,unsigned limit) {
-    if(text.empty() || text.front()=='-')
-        throw std::invalid_argument("invalid positive integer: "+text);
-    std::size_t parsed=0;
-    const auto value=std::stoull(text,&parsed,10);
-    if(parsed!=text.size() || value==0 || value>limit)
-        throw std::invalid_argument("integer out of range: "+text);
-    return static_cast<unsigned>(value);
-}
-
-Options parse_options(int argc,const char* argv[]) {
-    Options opts;
-    auto value_for=[&](int& index,std::string const& argument,std::string const& name) {
-        const std::string prefix="--"+name+"=";
-        if(argument.rfind(prefix,0)==0) return argument.substr(prefix.size());
-        if(index+1>=argc) throw std::invalid_argument("missing value for --"+name);
-        ++index;
-        return std::string(argv[index]);
+// Use CommandLine's standard help, threading, verbosity and warm-up parsing.
+List<ArgumentParser> benchmark_parsers(Options& opts) {
+    List<ArgumentParser> parsers;
+    auto positive=[&](String const& name,unsigned& field,unsigned max,
+                      String const& help) {
+        parsers.append(make_valued_argument_parser(
+            "",name,help,[&field,max](String const& input)->VoidFunction {
+                unsigned value=Bench::parse_unsigned<unsigned>(input);
+                if(value==0u||value>max)
+                    throw std::invalid_argument("rendering benchmark integer out of range");
+                return [&field,value]{field=value;};
+            }));
     };
-    for(int index=1;index<argc;++index) {
-        const std::string argument=argv[index];
-        if(argument=="--write-png") {
-            opts.write_png=true;
-        } else if(argument=="--breakdown") {
-            opts.breakdown=true;
-        } else if(argument=="--help" || argument=="-h") {
-            std::cout
-                <<"Usage: benchmark_rendering [options]\n"
-                <<"  --scene NAME        rectangles|polylines|circles|polygons|winding|mixed|all\n"
-                <<"  --width N           plot width (1..16384, default 640)\n"
-                <<"  --height N          plot height (1..16384, default 480)\n"
-                <<"  --iterations N      measured repetitions (1..10000, default 5)\n"
-                <<"  --warmup N          warmup repetitions (1..10000, default 1)\n"
-                <<"  --write-png         include PNG encoding and file output\n"
-                <<"  --png-prefix PATH   output prefix (default benchmark-drawing)\n"
-                <<"  --breakdown         run full/geometry/fill-only/stroke-only passes\n";
-            std::exit(0);
-        } else if(argument=="--scene" || argument.rfind("--scene=",0)==0) {
-            const auto value=value_for(index,argument,"scene");
-            if(value!="all" && value!="rectangles" && value!="polylines" &&
-               value!="circles" && value!="polygons" && value!="winding" &&
-               value!="mixed")
-                throw std::invalid_argument("invalid rendering scene: "+value);
-            opts.scene=value;
-        } else if(argument=="--width" || argument.rfind("--width=",0)==0) {
-            opts.width=positive_integer(value_for(index,argument,"width"),16384u);
-        } else if(argument=="--height" || argument.rfind("--height=",0)==0) {
-            opts.height=positive_integer(value_for(index,argument,"height"),16384u);
-        } else if(argument=="--iterations" || argument.rfind("--iterations=",0)==0) {
-            opts.iterations=positive_integer(value_for(index,argument,"iterations"),10000u);
-        } else if(argument=="--warmup" || argument.rfind("--warmup=",0)==0) {
-            opts.warmup=positive_integer(value_for(index,argument,"warmup"),10000u);
-        } else if(argument=="--png-prefix" || argument.rfind("--png-prefix=",0)==0) {
-            opts.png_prefix=value_for(index,argument,"png-prefix");
-            if(opts.png_prefix.empty()) throw std::invalid_argument("empty PNG prefix");
-        } else {
-            throw std::invalid_argument("unknown option: "+argument);
-        }
-    }
-    return opts;
+    positive("width",opts.width,16384u,"Canvas width (1..16384)");
+    positive("height",opts.height,16384u,"Canvas height (1..16384)");
+    positive("iterations",opts.iterations,10000u,
+             "Measured rounds (1..10000; default 5)");
+    parsers.append(make_valued_argument_parser(
+        "","scene","rectangles|polylines|circles|polygons|winding|mixed|all",
+        [&opts](String const& value)->VoidFunction {
+            std::string scene(value);
+            if(scene!="all"&&scene!="rectangles"&&scene!="polylines"&&
+               scene!="circles"&&scene!="polygons"&&scene!="winding"&&
+               scene!="mixed")
+                throw std::invalid_argument("invalid rendering scene: "+scene);
+            return [&opts,scene]{opts.scene=scene;};
+        }));
+    parsers.append(make_valued_argument_parser(
+        "","png-prefix","Output PNG filename prefix",
+        [&opts](String const& value)->VoidFunction {
+            std::string prefix(value);
+            if(prefix.empty())throw std::invalid_argument("empty PNG prefix");
+            return [&opts,prefix]{opts.png_prefix=prefix;};
+        }));
+    parsers.append(make_unvalued_argument_parser(
+        "","write-png","Include PNG encoding and file output",
+        [&opts]{opts.write_png=true;}));
+    parsers.append(make_unvalued_argument_parser(
+        "","breakdown","Run full/geometry/fill-only/stroke-only passes",
+        [&opts]{opts.breakdown=true;}));
+    return parsers;
 }
 
 void validate_options(Options const& opts) {
@@ -325,167 +298,130 @@ void draw(CanvasInterface& canvas,Scene const& scene,
     }
 }
 
-double milliseconds(Clock::time_point a,Clock::time_point b) {
-    return std::chrono::duration<double,std::milli>(b-a).count();
-}
-
-//! \brief Independent samples for each timing category.
-struct Samples {
-    std::vector<double> creation,initialisation,render,export_png;
+// Each Runner round performs the same complete canvas lifecycle as before.
+// Individual stage clocks preserve the original phase boundaries, while
+// Runner owns warm-ups, round count and optional per-round logging.
+struct PhaseSamples {
+    Bench::Samples creation,initialisation,render,export_png;
 };
-
-//! \brief Median and nearest-rank 95th-percentile timing.
-struct Statistics {
-    double median=0.0,p95=0.0;
-};
-Statistics summarize(std::vector<double> values) {
-    if(values.empty()) return {};
-    std::sort(values.begin(),values.end());
-    const std::size_t middle=values.size()/2;
-    const double median=values.size()%2 ? values[middle] :
-        (values[middle-1]+values[middle])/2.0;
-    const std::size_t p95_index=static_cast<std::size_t>(
-        std::ceil(0.95*static_cast<double>(values.size())))-1u;
-    return {median,values[p95_index]};
-}
-
-//! \brief Reported results for a single scene and rendering pass.
 struct Result {
     std::string scene;
     RenderPass pass=RenderPass::full;
-    std::size_t primitives=0, commands=0;
-    Statistics creation, initialisation, rendering, png;
+    std::size_t primitives=0,commands=0;
+    Bench::Statistics creation,initialisation,rendering,png;
     double primitives_per_second=0.0;
 };
 
 Result benchmark(Options const& opts,Scene const& scene,
-                 RenderPass pass=RenderPass::full) {
-    Samples samples;
-    const unsigned repeats=opts.warmup+opts.iterations;
-    const std::string filename=
-        opts.png_prefix+"-"+scene.name+
+                 Bench::Runner const& runner,RenderPass pass=RenderPass::full) {
+    PhaseSamples stages;
+    unsigned round=0u;
+    std::string const filename=opts.png_prefix+"-"+scene.name+
         (pass==RenderPass::full ? "" : std::string("-")+pass_name(pass))+".png";
-
-    for(unsigned i=0;i<repeats;++i) {
-        const auto before=Clock::now();
-        auto canvas=DefaultRenderingBackend().make_canvas(
-            "",opts.width,opts.height,false);
-        const auto constructed=Clock::now();
-        canvas->initialise("x","y",-1.0,1.0,-1.0,1.0);
-        const auto initialized=Clock::now();
-        draw(*canvas,scene,pass);
-        const auto rendered=Clock::now();
-        if(opts.write_png) canvas->write(filename.c_str());
-        const auto finished=Clock::now();
-        if(i>=opts.warmup) {
-            samples.creation.push_back(milliseconds(before,constructed));
-            samples.initialisation.push_back(milliseconds(constructed,initialized));
-            samples.render.push_back(milliseconds(initialized,rendered));
-            if(opts.write_png)
-                samples.export_png.push_back(milliseconds(rendered,finished));
-        }
-    }
-
-    const auto creation=summarize(samples.creation);
-    const auto initialisation=summarize(samples.initialisation);
-    const auto rendering=summarize(samples.render);
-    const auto png=summarize(samples.export_png);
-    const double throughput=rendering.median>0.0 ?
-        1000.0*static_cast<double>(scene.primitives)/rendering.median : 0.0;
+    auto const elapsed=runner.run(scene.name+"/"+pass_name(pass),opts.iterations,
+        [] {},
+        [&]{
+            auto const start=Bench::Clock::now();
+            auto canvas=DefaultRenderingBackend().make_canvas(
+                "",opts.width,opts.height,false);
+            auto const made=Bench::Clock::now();
+            canvas->initialise("x","y",-1.0,1.0,-1.0,1.0);
+            auto const initialized=Bench::Clock::now();
+            draw(*canvas,scene,pass);
+            auto const rendered=Bench::Clock::now();
+            if(opts.write_png)canvas->write(filename.c_str());
+            auto const finished=Bench::Clock::now();
+            if(round>=runner.warmups()) {
+                stages.creation.add(Bench::elapsed_ns(start,made));
+                stages.initialisation.add(Bench::elapsed_ns(made,initialized));
+                stages.render.add(Bench::elapsed_ns(initialized,rendered));
+                if(opts.write_png)
+                    stages.export_png.add(Bench::elapsed_ns(rendered,finished));
+            }
+            ++round;
+        },[] {});
+    if(elapsed.size()!=opts.iterations||stages.render.size()!=opts.iterations)
+        throw std::runtime_error("rendering sample count mismatch");
+    auto creation=Bench::summarize(stages.creation);
+    auto initialization=Bench::summarize(stages.initialisation);
+    auto rendering=Bench::summarize(stages.render);
+    auto png=opts.write_png?Bench::summarize(stages.export_png):Bench::Statistics{};
+    double const throughput=rendering.median>0.0
+        ? 1e9*static_cast<double>(scene.primitives)/rendering.median : 0.0;
     return {scene.name,pass,scene.primitives,scene.commands.size(),
-            creation,initialisation,rendering,png,throughput};
+            creation,initialization,rendering,png,throughput};
 }
 
-// Consistent terminal formatting shared by all scenarios; no CSV is emitted.
-// The overall report is built after timing to avoid logging in hot loops.
-std::string fixed(double value,int precision=3) {
-    std::ostringstream stream;
-    stream<<std::fixed<<std::setprecision(precision)<<value;
-    return stream.str();
-}
-
-void print_table(Options const& opts,std::vector<Result> const& results) {
-    struct Column { std::string title; std::size_t width; bool left; };
-    std::vector<Column> columns{
-        {"scene",10u,true},
-        {"shapes",6u,false},
-        {"commands",8u,false},
-        {"create ms",9u,false},
-        {"init ms",8u,false},
-        {"render ms",9u,false},
-        {"p95 ms",8u,false},
-        {"shapes/s",9u,false}
-    };
-    if(opts.breakdown)
-        columns.insert(columns.begin()+1,{"pass",11u,true});
-    if(opts.write_png) columns.push_back({"PNG ms",8u,false});
-
-    std::vector<std::vector<std::string>> rows;
-    rows.reserve(results.size());
+void print_table(Options const& opts,Bench::CommandLine const& cli,
+                 std::vector<Result> const& results) {
+    std::vector<Bench::TableColumn> columns={
+        {"scene"},{"shapes",0u,Bench::TableAlignment::Right},
+        {"commands",0u,Bench::TableAlignment::Right},
+        {"create ms",0u,Bench::TableAlignment::Right},
+        {"init ms",0u,Bench::TableAlignment::Right},
+        {"render ms",0u,Bench::TableAlignment::Right},
+        {"p95 ms",0u,Bench::TableAlignment::Right},
+        {"shapes/s",0u,Bench::TableAlignment::Right}};
+    if(opts.breakdown)columns.insert(columns.begin()+1u,{"pass"});
+    if(opts.write_png)columns.push_back({"PNG ms",0u,Bench::TableAlignment::Right});
+    auto style=Bench::TableOptions::ruled();
+    style.group_columns={0u};
+    Bench::Table overview(std::move(columns),style);
     for(auto const& result:results) {
-        std::vector<std::string> row{
-            result.scene,
-            std::to_string(result.primitives),
+        std::vector<std::string> row={
+            result.scene,std::to_string(result.primitives),
             std::to_string(result.commands),
-            fixed(result.creation.median),
-            fixed(result.initialisation.median),
-            fixed(result.rendering.median),
-            fixed(result.rendering.p95),
-            fixed(result.primitives_per_second,0)
+            Bench::Table::number(result.creation.median/1e6),
+            Bench::Table::number(result.initialisation.median/1e6),
+            Bench::Table::number(result.rendering.median/1e6),
+            Bench::Table::number(result.rendering.p95/1e6),
+            Bench::Table::number(result.primitives_per_second,0u)};
+        if(opts.breakdown)row.insert(row.begin()+1u,pass_name(result.pass));
+        if(opts.write_png)row.push_back(Bench::Table::number(result.png.median/1e6));
+        overview.add_row(std::move(row));
+    }
+    LOGGING_PRINTLN("Drawing performance benchmark")
+    LOGGING_PRINTLN("Plot: "<<opts.width<<" x "<<opts.height
+        <<" px | iterations: "<<opts.iterations
+        <<" | warmups: "<<cli.warmups()<<" | scene: "<<opts.scene)
+    LOGGING_PRINTLN("Render excludes canvas creation, initialization and PNG I/O.")
+    if(opts.breakdown) {
+        LOGGING_PRINTLN("Diagnostic passes suppress paints, not path construction;"
+            " independent end-to-end passes must not be added together.")
+    }
+    LOGGING_PRINTLN(overview.str())
+
+    Bench::Report report("Rendering phase statistics (nanoseconds)",
+                         cli.summary_fields());
+    report.set_dimension_columns({
+        {"Scene"},{"Pass"},{"Phase"},
+        {"Shapes",0u,Bench::TableAlignment::Right}});
+    report.set_table_options(style);
+    for(auto const& result:results) {
+        auto add=[&](char const* phase,Bench::Statistics const& stats) {
+            report.add_row({result.scene,pass_name(result.pass),phase,
+                            std::to_string(result.primitives)},stats);
         };
-        if(opts.breakdown)
-            row.insert(row.begin()+1,pass_name(result.pass));
-        if(opts.write_png) row.push_back(fixed(result.png.median));
-        for(std::size_t i=0;i<row.size();++i)
-            columns[i].width=std::max(columns[i].width,row[i].size());
-        rows.push_back(std::move(row));
+        add("creation",result.creation);
+        add("initialisation",result.initialisation);
+        add("rendering",result.rendering);
+        if(opts.write_png)add("PNG",result.png);
     }
-
-    const std::size_t spacing=2u;
-    std::size_t total_width=spacing*(columns.size()-1u);
-    for(auto const& column:columns)
-        total_width+=column.width;
-    const std::string line(total_width,'-');
-
-    std::ostringstream out;
-    out<<"Drawing performance benchmark\n"
-       <<"Plot: "<<opts.width<<" x "<<opts.height
-       <<" px | iterations: "<<opts.iterations
-       <<" | warmup: "<<opts.warmup
-       <<" | scene: "<<opts.scene<<"\n"
-       <<"Render excludes canvas creation, initialization and PNG I/O.\n";
-    if(opts.breakdown)
-        out<<"Diagnostic passes disable fill/stroke paints, not path construction.\n"
-           <<"Times are separate end-to-end passes, not additive phase timings.\n";
-    out<<"\n";
-    auto print_row=[&](std::vector<std::string> const& values) {
-        for(std::size_t i=0;i<columns.size();++i) {
-            if(i!=0) out<<std::string(spacing,' ');
-            out<<(columns[i].left ? std::left : std::right)
-               <<std::setw(static_cast<int>(columns[i].width))
-               <<values[i];
-        }
-        out<<"\n";
-    };
-    std::vector<std::string> titles;
-    titles.reserve(columns.size());
-    for(auto const& column:columns) titles.push_back(column.title);
-    print_row(titles);
-    out<<line<<"\n";
-    for(std::size_t i=0;i<rows.size();++i) {
-        print_row(rows[i]);
-        if(i+1u==rows.size() || rows[i+1u][1]!=rows[i][1])
-            out<<line<<"\n";
-    }
-    std::cout<<out.str();
+    report.print();
 }
 
 } // namespace
 
 int main(int argc,const char* argv[]) {
     try {
-        const Options opts=parse_options(argc,argv);
+        Options opts;
+        Bench::CommandLine cli;
+        cli.add(CommandLineContribution("rendering-benchmark",benchmark_parsers(opts)));
+        if(!cli.acquire(argc,argv))return 0;
+        if(ThreadManager::instance().concurrency()!=0u)
+            throw std::invalid_argument("rendering benchmark requires --concurrency 0");
         validate_options(opts);
+        Bench::Runner runner(cli,opts.scene=="all"?6u:1u);
         // All input geometry is prepared outside the measured rendering.
         const auto scenes=make_scenes();
         std::vector<Result> results;
@@ -497,12 +433,12 @@ int main(int argc,const char* argv[]) {
         for(auto const& scene:scenes) {
             if(opts.scene!="all" && scene.name!=opts.scene) continue;
             for(auto pass:passes)
-                results.push_back(benchmark(opts,scene,pass));
+                results.push_back(benchmark(opts,scene,runner,pass));
         }
-        print_table(opts,results);
+        print_table(opts,cli,results);
         return 0;
     } catch(std::exception const& error) {
-        std::cerr<<"rendering benchmark failed: "<<error.what()<<'\n';
+        LOGGING_PRINTLN("rendering benchmark failed: "<<error.what())
         return 1;
     }
 }

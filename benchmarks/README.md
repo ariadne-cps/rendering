@@ -14,7 +14,7 @@ Build a Release configuration, since Debug benchmarks are misleading:
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target benchmark_rendering --parallel
-./build/benchmarks/benchmark_rendering --iterations 7 --warmup 2
+./build/benchmarks/benchmark_rendering --iterations 7 --warmups 2
 ```
 
 The executable's location depends on the generator and build configuration.
@@ -23,7 +23,7 @@ The existing project-wide `benchmarks` target also builds this benchmark.
 Select one scenario/size (for tracking performance across commits):
 
 ```sh
-./build/benchmarks/benchmark_rendering --scene rectangles --width 800 --height 800 --iterations 10 --warmup 2
+./build/benchmarks/benchmark_rendering --scene rectangles --width 800 --height 800 --iterations 10 --warmups 2
 ```
 
 Optionally measure PNG generation and file I/O **separately**, by writing to
@@ -41,7 +41,7 @@ path lifecycle with both paints disabled), `fill-only` (fill enabled,
 stroke disabled), and `stroke-only` (fill disabled, stroke enabled).
 
 ```sh
-./build/benchmarks/benchmark_rendering --scene rectangles --iterations 20 --warmup 3 --breakdown
+./build/benchmarks/benchmark_rendering --scene rectangles --iterations 20 --warmups 3 --breakdown
 ```
 
 The table gains a `pass` column. These are **separate end-to-end
@@ -64,11 +64,19 @@ commands to maintain path lifecycle. The regular invocation (without
 
 The scene command buffers, including coordinates and trigonometric values,
 are prepared **outside the measured section**. Every timed repetition creates a fresh canvas so no previous
-frame can affect the next. Measurements use `steady_clock` and report
-median and nearest-rank p95 over the measured repetitions.
+frame can affect the next. Measurements use `Benchmarking::Runner` and the shared monotonic clock. Each round
+still creates and initializes one canvas, draws the selected scene, and optionally
+writes PNG; the independent phase durations are recorded in nanoseconds and
+summarized by `Benchmarking::Statistics`. The overview retains median and
+nearest-rank p95 timings in milliseconds and shapes per second.
 
-Results are presented as an **aligned terminal table**, in the style of
-the integration benchmarks. The report is printed directly to standard output; no CSV files or CSV output are generated.
+The framework's `--warmups` option excludes warm-up rounds (default: 0;
+use `--warmups 1` for the old driver's default). `--summary` chooses the
+statistics displayed by the supplementary per-phase `Benchmarking::Report`.
+`--verbosity 1` prints both tables; `--verbosity 0` suppresses ordinary output.
+
+Results are presented through the shared `Benchmarking::Table` and `Report`
+facilities at ordinary Logging verbosity. No CSV is generated.
 
 The benchmark has a standalone command-line parser and depends only on the
 rendering library. Supported options are `--scene`, `--width`, `--height`,
