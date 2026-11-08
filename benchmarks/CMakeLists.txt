@@ -1,10 +1,10 @@
 # The Benchmarking module registers this directory and owns the aggregate
 # benchmarks target. Rendering's compiled objects already include Utility;
-# add only Threading/Logging objects not present in Rendering's bundle.
+# add only Logging objects not present in Rendering's bundle.
 get_target_property(_rendering_objects rendering ARIADNE_PROJECT_OBJECT_TARGETS)
-get_target_property(_threading_objects threading ARIADNE_PROJECT_OBJECT_TARGETS)
+get_target_property(_threading_objects logging ARIADNE_PROJECT_OBJECT_TARGETS)
 if(NOT _rendering_objects OR NOT _threading_objects)
-    message(FATAL_ERROR "Missing Rendering/Threading object target registrations")
+    message(FATAL_ERROR "Missing Rendering/Logging object target registrations")
 endif()
 foreach(_object IN LISTS _rendering_objects)
     list(REMOVE_ITEM _threading_objects "${_object}")
