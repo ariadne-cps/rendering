@@ -13,7 +13,7 @@ tutorial against the installed headers and shared library (as in Satisfiability)
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release --target ariadne-rendering bindings
 cmake --install build-release --prefix "$PWD/install"
-cmake -S tutorials/tutorial_rendering -B build-tutorial \
+cmake -S tutorial -B build-tutorial \
   -DCMAKE_PREFIX_PATH="$PWD/install"
 cmake --build build-tutorial
 (cd build-tutorial && ./tutorial_rendering)
@@ -30,7 +30,7 @@ Ensure the standalone Rendering Python module from the build is importable,
 then run:
 
 ```sh
-PYTHONPATH="$PWD/build-release/python" python python/tutorials/tutorial_rendering.py
+PYTHONPATH="$PWD/build-release/python" python python/tutorial.py
 ```
 
 This tutorial demonstrates backend selection, rendering properties, figure

@@ -93,7 +93,7 @@ jobs:
 
       - name: Prepare C++ Rendering tutorial
         if: matrix.build_type == 'Release'
-        run: cmake -E copy_directory "$GITHUB_WORKSPACE/tutorials/tutorial_rendering" "${{ runner.workspace }}/tutorial_rendering"
+        run: cmake -E copy_directory "$GITHUB_WORKSPACE/tutorial" "${{ runner.workspace }}/tutorial_rendering"
 
       - name: Build and run C++ Rendering tutorial
         if: matrix.build_type == 'Release'
@@ -111,7 +111,7 @@ jobs:
 
       - name: Run Python Rendering tutorial
         if: matrix.build_type == 'Release'
-        working-directory: ${{ github.workspace }}/python/tutorials
+        working-directory: ${{ github.workspace }}/tutorial
         env:
           PYTHONPATH: ${{ runner.workspace }}/build/python
           LD_LIBRARY_PATH: ${{ runner.workspace }}/install/lib:${{ env.LD_LIBRARY_PATH }}
