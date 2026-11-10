@@ -22,4 +22,7 @@ endif()
 require_same_dependency_commit(Build CHAINS
     "build" "utility|build")
 
+require_same_dependency_commit(Utility CHAINS
+    "utility" "benchmarking|logging|utility")
+
 ariadne_setup_module(rendering)
