@@ -1,29 +1,29 @@
 /***************************************************************************
- *            tests/rendering/test_default_rendering_regression.cpp
+ *            tests/test_default_rendering_regression.cpp
  *
  *  Copyright  2026  Luca Geretti
  *
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of Ariadne Rendering.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  Ariadne Rendering is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  Ariadne Rendering is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with Ariadne Rendering. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file tests/rendering/test_default_rendering_regression.cpp
- *  \brief Rendering regression scenes and pixel-level consistency checks.
+/** @file tests/test_default_rendering_regression.cpp
+ *  @brief Exercise pixel-exact software rendering regression tests.
  */
 
 #include <cmath>
