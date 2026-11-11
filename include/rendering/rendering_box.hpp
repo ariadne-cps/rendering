@@ -32,6 +32,7 @@
 #include <initializer_list>
 #include <ostream>
 #include <vector>
+
 #include "utility/typedefs.hpp"
 
 namespace Ariadne {
@@ -40,14 +41,14 @@ namespace Ariadne {
 struct RenderingInterval {
     double lower, upper;
     /** @brief Construct an interval from lower and upper display bounds. */
-    RenderingInterval(double l, double u) : lower(l), upper(u) { }
+    RenderingInterval(double l, double u) : lower(l), upper(u) {}
     /** @brief Return lower bound. */
     double lower_bound() const { return lower; }
     /** @brief Return upper bound. */
     double upper_bound() const { return upper; }
 };
 /** @brief Implement the operator<< operation. */
-inline OutputStream& operator<<(OutputStream& os, RenderingInterval const& interval) {
+inline OutputStream& operator<<(OutputStream& os, const RenderingInterval& interval) {
     return os << "[" << interval.lower << "," << interval.upper << "]";
 }
 
@@ -57,24 +58,25 @@ class RenderingBox {
     /** @brief Construct an empty viewing box. */
     RenderingBox() = default;
     /** @brief Perform the RenderingBox operation. */
-    explicit RenderingBox(DimensionType n) : _intervals(n,RenderingInterval(-1.0,1.0)) { }
+    explicit RenderingBox(DimensionType n) : _intervals(n, RenderingInterval(-1.0, 1.0)) {}
     /** @brief Construct a viewing box by repeating the supplied interval. */
-    RenderingBox(DimensionType n, RenderingInterval interval) : _intervals(n,interval) { }
+    RenderingBox(DimensionType n, RenderingInterval interval) : _intervals(n, interval) {}
     /** @brief Construct a viewing box from explicit intervals. */
-    RenderingBox(std::initializer_list<RenderingInterval> intervals) : _intervals(intervals) { }
+    RenderingBox(std::initializer_list<RenderingInterval> intervals) : _intervals(intervals) {}
 
     /** @brief Return dimension. */
     DimensionType dimension() const { return _intervals.size(); }
     /** @brief Implement the operator[] operation. */
-    RenderingInterval const& operator[](DimensionType i) const { return _intervals[i]; }
+    const RenderingInterval& operator[](DimensionType i) const { return _intervals[i]; }
     /** @brief Implement the operator[] operation. */
     RenderingInterval& operator[](DimensionType i) { return _intervals[i]; }
 
     /** @brief Implement the operator<< operation. */
-    friend OutputStream& operator<<(OutputStream& os, RenderingBox const& box) {
+    friend OutputStream& operator<<(OutputStream& os, const RenderingBox& box) {
         os << "RenderingBox(";
-        for(DimensionType i=0; i!=box.dimension(); ++i) {
-            if(i!=0) os << ",";
+        for (DimensionType i = 0; i != box.dimension(); ++i) {
+            if (i != 0)
+                os << ",";
             os << box[i];
         }
         return os << ")";

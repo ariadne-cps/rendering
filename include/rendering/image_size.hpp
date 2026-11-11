@@ -29,8 +29,8 @@
 #ifndef ARIADNE_IMAGE_SIZE_HPP
 #define ARIADNE_IMAGE_SIZE_HPP
 
-#include "utility/typedefs.hpp"
 #include "utility/macros.hpp"
+#include "utility/typedefs.hpp"
 
 namespace Ariadne {
 
@@ -38,7 +38,7 @@ namespace Ariadne {
 struct ImageSize2d {
     Nat nx, ny;
     /** @brief Construct a raster size from unsigned pixel dimensions. */
-    ImageSize2d(Nat x, Nat y) : nx(x), ny(y) { }
+    ImageSize2d(Nat x, Nat y) : nx(x), ny(y) {}
     /** @brief Construct a raster size from signed positive pixel dimensions. */
     ImageSize2d(Int x, Int y) {
         ARIADNE_PRECONDITION(x > 0 && y > 0);

@@ -30,8 +30,9 @@
 #define ARIADNE_RENDERING_BACKEND_INTERFACE_HPP
 
 #include <iosfwd>
-#include "utility/pointer.hpp"
+
 #include "utility/handle.hpp"
+#include "utility/pointer.hpp"
 
 namespace Ariadne {
 
@@ -50,16 +51,15 @@ class RenderingBackendInterface {
 
 //! \brief Handle for rendering backends
 class RenderingBackend
-    : public Handle<const RenderingBackendInterface>
-{
+    : public Handle<const RenderingBackendInterface> {
   public:
     using Handle<const RenderingBackendInterface>::Handle;
     /** @brief Create canvas. */
     SharedPointer<CanvasInterface> make_canvas(const char* cfilename, Nat drawing_width, Nat drawing_height, Bool is_animated) const {
-        return this->_ptr->make_canvas(cfilename,drawing_width,drawing_height, is_animated); }
+        return this->_ptr->make_canvas(cfilename, drawing_width, drawing_height, is_animated);
+    }
 };
 
-
-} //namespace Ariadne
+} // namespace Ariadne
 
 #endif /* ARIADNE_RENDERING_BACKEND_INTERFACE_HPP */

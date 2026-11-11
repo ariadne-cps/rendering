@@ -26,11 +26,12 @@
  *  @brief Implement the shared rendering backend manager.
  */
 
-#include "utility/handle.hpp"
-#include "rendering/rendering_backend_interface.hpp"
 #include "rendering/rendering_manager.hpp"
-#include "rendering/geometry2d.hpp"
+
 #include "rendering/default_rendering.hpp"
+#include "rendering/geometry2d.hpp"
+#include "rendering/rendering_backend_interface.hpp"
+#include "utility/handle.hpp"
 
 namespace Ariadne {
 
@@ -46,11 +47,11 @@ RenderingManager& RenderingManager::instance() {
     return instance;
 }
 
-RenderingBackend const& RenderingManager::backend() const {
+const RenderingBackend& RenderingManager::backend() const {
     return _backend;
 }
 
-Void RenderingManager::set_backend(RenderingBackend const& backend) {
+Void RenderingManager::set_backend(const RenderingBackend& backend) {
     _backend = backend;
 }
 

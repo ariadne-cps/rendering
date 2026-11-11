@@ -39,25 +39,25 @@ class RenderingManager {
   private:
     /** @brief Create the manager with its initial rendering backend. */
     RenderingManager();
+
   public:
     //! \brief Disable copy construction
-    RenderingManager(RenderingManager const&) = delete;
+    RenderingManager(const RenderingManager &) = delete;
     //! \brief Disable copy assignment
-    Void operator=(RenderingManager const&) = delete;
+    Void operator=(const RenderingManager &) = delete;
 
     //! \brief Return the static instance, lazily instantiated
-    static RenderingManager& instance();
+    static RenderingManager &instance();
 
     //! \brief The backend to use
-    RenderingBackend const& backend() const;
+    const RenderingBackend &backend() const;
     //! \brief Set the backend
-    Void set_backend(RenderingBackend const& backend);
+    Void set_backend(const RenderingBackend &backend);
 
   private:
     RenderingBackend _backend;
 };
 
 } // namespace Ariadne
-
 
 #endif // ARIADNE_RENDERING_MANAGER_HPP

@@ -28,9 +28,10 @@
 
 #ifndef ARIADNE_RENDERING_INTERFACE_HPP
 #define ARIADNE_RENDERING_INTERFACE_HPP
-#include "utility/container.hpp"
 #include <ostream>
+
 #include "rendering/rendering_box.hpp"
+#include "utility/container.hpp"
 
 namespace Ariadne {
 
@@ -56,13 +57,15 @@ class CanvasInterface;
 struct Projection2d;
 
 /** @brief Represent ProjType for rendering operations. */
-enum class ProjType{ no_proj, x1_proj, x2_proj };
+enum class ProjType { no_proj,
+                      x1_proj,
+                      x2_proj };
 
 /** @brief Select two coordinates from an N-dimensional drawing space. */
 struct Projection2d {
     DimensionType n, i, j;
     /** @brief Construct a projection by specifying the source dimension and two coordinates. */
-    Projection2d(DimensionType nn, DimensionType ii, DimensionType jj) : n(nn), i(ii), j(jj) { }
+    Projection2d(DimensionType nn, DimensionType ii, DimensionType jj) : n(nn), i(ii), j(jj) {}
     /** @brief Return argument size. */
     DimensionType argument_size() const { return n; }
     /** @brief Return x coordinate. */
@@ -71,9 +74,9 @@ struct Projection2d {
     DimensionType y_coordinate() const { return j; }
     /** @brief Implement the operator<< operation. */
     friend OutputStream& operator<<(OutputStream& os, const Projection2d& p) {
-        return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
+        return os << "P<R" << p.n << ";R2>[x" << p.i << ",x" << p.j << "]";
+    }
 };
-
 
 //! \ingroup RenderingModule
 //! \brief Base interface for plotting and drawing classes.
@@ -153,7 +156,7 @@ class CanvasInterface {
     virtual Void fill() = 0;
 
     //! \brief Draw the lines from the \a boundary and fill the corresponding closed polytope
-    virtual Void fill_boundary(List<Point2d> const& boundary) = 0;
+    virtual Void fill_boundary(const List<Point2d>& boundary) = 0;
 
     //! Set the width of the lines bounding shapes, in pixels.
     virtual Void set_line_width(double lw) = 0;
@@ -164,10 +167,7 @@ class CanvasInterface {
     virtual Void set_fill_opacity(double fo) = 0;
     //! \brief Set the colour of subsequent regions to be filled.
     virtual Void set_fill_colour(double r, double g, double b) = 0;
-
-
 };
-
 
 //! \ingroup RenderingModule
 //! \brief Base interface for drawable objects
@@ -183,9 +183,6 @@ class Drawable2dInterface {
     virtual DimensionType dimension() const = 0;
 };
 
-
-
 } // namespace Ariadne
-
 
 #endif // ARIADNE_RENDERING_INTERFACE_HPP

@@ -28,8 +28,9 @@
 
 #include <sstream>
 
-#include "ariadne-testing.hpp"
 #include "rendering/null_rendering.hpp"
+
+#include "ariadne-testing.hpp"
 
 using namespace Ariadne;
 
@@ -74,8 +75,6 @@ class TestNullRendering : public Ariadne::Testing::ContextFixture {
         ARIADNE_TESTING_PROVE(canvas);
         canvas->move_to(0.0, 0.0);
     }
-
-
 };
 
 int main(int argc, char** argv) {

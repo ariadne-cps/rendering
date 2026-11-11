@@ -33,11 +33,11 @@
 #include <string>
 #include <vector>
 
-#include "rendering/default_rendering.hpp"
-#include "default_rendering_png.hpp"
 #include "default_rendering_golden.hpp"
-#include "ariadne-testing.hpp"
+#include "default_rendering_png.hpp"
+#include "rendering/default_rendering.hpp"
 
+#include "ariadne-testing.hpp"
 
 using namespace Ariadne;
 
@@ -67,248 +67,265 @@ static void geometry(CanvasInterface& c, const char* filename, int scene) {
     c.set_line_colour(0.05, 0.1, 0.4);
     c.set_fill_colour(0.75, 0.25, 0.1);
     c.set_fill_opacity(0.6);
-    if(scene == 0) {
+    if (scene == 0) {
         // Outer CCW and inner CW: nonzero winding leaves a hole.
-        c.move_to(-0.8,-0.8); c.line_to(0.8,-0.8);
-        c.line_to(0.8,0.8); c.line_to(-0.8,0.8);
-        c.line_to(-0.8,-0.8);
-        c.move_to(-0.4,-0.4); c.line_to(-0.4,0.4);
-        c.line_to(0.4,0.4); c.line_to(0.4,-0.4);
-        c.line_to(-0.4,-0.4);
+        c.move_to(-0.8, -0.8);
+        c.line_to(0.8, -0.8);
+        c.line_to(0.8, 0.8);
+        c.line_to(-0.8, 0.8);
+        c.line_to(-0.8, -0.8);
+        c.move_to(-0.4, -0.4);
+        c.line_to(-0.4, 0.4);
+        c.line_to(0.4, 0.4);
+        c.line_to(0.4, -0.4);
+        c.line_to(-0.4, -0.4);
         c.fill();
-    } else if(scene == 1) {
+    } else if (scene == 1) {
         c.set_line_width(18.0);
-        c.move_to(-0.85,-0.65);
-        c.line_to(0.0,0.65);
-        c.line_to(0.85,-0.65);
+        c.move_to(-0.85, -0.65);
+        c.line_to(0.0, 0.65);
+        c.line_to(0.85, -0.65);
         c.stroke();
         c.set_fill_opacity(0.3);
         c.set_line_width(3.0);
-        c.move_to(-0.3,0.0); c.line_to(0.3,0.0);
-        c.line_to(0.3,-0.5); c.line_to(-0.3,-0.5);
+        c.move_to(-0.3, 0.0);
+        c.line_to(0.3, 0.0);
+        c.line_to(0.3, -0.5);
+        c.line_to(-0.3, -0.5);
         c.fill();
-    } else if(scene == 2) {
+    } else if (scene == 2) {
         c.set_line_width(5.0);
-        c.move_to(-1.6,-1.6);
-        c.line_to(1.6,1.6);
+        c.move_to(-1.6, -1.6);
+        c.line_to(1.6, 1.6);
         c.stroke();
-        c.circle(0,0,0.6);
+        c.circle(0, 0, 0.6);
         c.fill();
-    } else if(scene == 3) {
+    } else if (scene == 3) {
         c.set_line_width(4.0);
-        c.move_to(-0.8,0.0);
-        c.circle(0.0,0.0,0.35);
-        c.line_to(0.8,0.0);
+        c.move_to(-0.8, 0.0);
+        c.circle(0.0, 0.0, 0.35);
+        c.line_to(0.8, 0.0);
         c.stroke();
-    } else if(scene == 4) {
+    } else if (scene == 4) {
         // Both explicit and implicit closing edges, at fractional device
         // coordinates. Also check winding direction and clipping at the edge.
         c.set_line_width(0.8);
         c.set_fill_opacity(0.4);
-        for(int row=0;row<7;++row) for(int col=0;col<10;++col) {
-            double x=-1.12+0.238*col;
-            double y=-1.08+0.336*row;
-            double w=0.192,h=0.271;
-            if((row+col)%2==0) {
-                c.move_to(x,y);
-                c.line_to(x+w,y);
-                c.line_to(x+w,y+h);
-                c.line_to(x,y+h);
-                c.line_to(x,y);  // Explicit closure.
-            } else {
-                c.move_to(x,y);
-                c.line_to(x,y+h);
-                c.line_to(x+w,y+h);
-                c.line_to(x+w,y); // Implicit closure on fill.
+        for (int row = 0; row < 7; ++row)
+            for (int col = 0; col < 10; ++col) {
+                double x = -1.12 + 0.238 * col;
+                double y = -1.08 + 0.336 * row;
+                double w = 0.192, h = 0.271;
+                if ((row + col) % 2 == 0) {
+                    c.move_to(x, y);
+                    c.line_to(x + w, y);
+                    c.line_to(x + w, y + h);
+                    c.line_to(x, y + h);
+                    c.line_to(x, y); // Explicit closure.
+                } else {
+                    c.move_to(x, y);
+                    c.line_to(x, y + h);
+                    c.line_to(x + w, y + h);
+                    c.line_to(x + w, y); // Implicit closure on fill.
+                }
+                c.fill();
             }
-            c.fill();
-        }
-    } else if(scene == 5) {
+    } else if (scene == 5) {
         // Butt caps, subpixel-width strokes and clipped segments at
         // multiple orientations, including exact horizontal/vertical lines.
-        for(int k=0;k<12;++k) {
-            c.set_line_width(0.75+0.28*(k%5));
-            double y=-0.90+0.16*k;
-            c.move_to(-1.2,y);
-            c.line_to(1.2,y+0.12*std::sin(k));
+        for (int k = 0; k < 12; ++k) {
+            c.set_line_width(0.75 + 0.28 * (k % 5));
+            double y = -0.90 + 0.16 * k;
+            c.move_to(-1.2, y);
+            c.line_to(1.2, y + 0.12 * std::sin(k));
             c.stroke();
         }
         c.set_line_width(3.25);
-        c.move_to(0.0,-1.2); c.line_to(0.0,1.2); c.stroke();
-        c.move_to(-1.2,0.0); c.line_to(1.2,0.0); c.stroke();
-    } else if(scene == 6) {
+        c.move_to(0.0, -1.2);
+        c.line_to(0.0, 1.2);
+        c.stroke();
+        c.move_to(-1.2, 0.0);
+        c.line_to(1.2, 0.0);
+        c.stroke();
+    } else if (scene == 6) {
         // Concave multi-edge fill must NOT take the rectangle fast path.
-        c.move_to(-0.8,-0.8); c.line_to(0.8,-0.8);
-        c.line_to(0.2,-0.2); c.line_to(0.8,0.8);
-        c.line_to(-0.8,0.8); c.line_to(-0.2,0.1);
+        c.move_to(-0.8, -0.8);
+        c.line_to(0.8, -0.8);
+        c.line_to(0.2, -0.2);
+        c.line_to(0.8, 0.8);
+        c.line_to(-0.8, 0.8);
+        c.line_to(-0.2, 0.1);
         c.fill();
-    } else if(scene == 7 || scene == 8) {
+    } else if (scene == 7 || scene == 8) {
         // Nested rectangles: reversed subpath order, same/opposite winding,
         // fractional coordinates and clipping. Also exercise the generic
         // path when nested contours touch or otherwise fail the fast path.
         c.set_line_width(1.25);
         c.set_fill_opacity(0.55);
-        auto rectangle=[&c](double xl,double yl,double xu,double yu,
-                             bool reverse) {
-            if(reverse) {
-                c.move_to(xl,yl); c.line_to(xl,yu);
-                c.line_to(xu,yu); c.line_to(xu,yl);
-                c.line_to(xl,yl);
+        auto rectangle = [&c](double xl, double yl, double xu, double yu,
+                              bool reverse) {
+            if (reverse) {
+                c.move_to(xl, yl);
+                c.line_to(xl, yu);
+                c.line_to(xu, yu);
+                c.line_to(xu, yl);
+                c.line_to(xl, yl);
             } else {
-                c.move_to(xl,yl); c.line_to(xu,yl);
-                c.line_to(xu,yu); c.line_to(xl,yu);
-                c.line_to(xl,yl);
+                c.move_to(xl, yl);
+                c.line_to(xu, yl);
+                c.line_to(xu, yu);
+                c.line_to(xl, yu);
+                c.line_to(xl, yl);
             }
         };
-        if(scene == 7) {
+        if (scene == 7) {
             // Opposite winding; both possible contour submission orders.
-            rectangle(-0.95,-0.69,-0.38,0.68,false);
-            rectangle(-0.81,-0.42,-0.52,0.39,true);
+            rectangle(-0.95, -0.69, -0.38, 0.68, false);
+            rectangle(-0.81, -0.42, -0.52, 0.39, true);
             c.fill();
-            rectangle(-0.19,-0.41,0.13,0.42,true);
-            rectangle(-0.33,-0.69,0.27,0.68,false);
+            rectangle(-0.19, -0.41, 0.13, 0.42, true);
+            rectangle(-0.33, -0.69, 0.27, 0.68, false);
             c.fill();
-            rectangle(0.43,-0.38,0.81,0.41,false);
-            rectangle(0.36,-0.69,0.96,0.68,true);
+            rectangle(0.43, -0.38, 0.81, 0.41, false);
+            rectangle(0.36, -0.69, 0.96, 0.68, true);
             c.fill();
         } else {
             // Same winding fills the inner region too. Nested contours
             // touching the outer boundary must instead use general filling.
-            rectangle(-1.08,-0.68,-0.17,0.65,false);
-            rectangle(-0.83,-0.41,-0.37,0.43,false);
+            rectangle(-1.08, -0.68, -0.17, 0.65, false);
+            rectangle(-0.83, -0.41, -0.37, 0.43, false);
             c.fill();
-            rectangle(0.17,-0.68,1.08,0.65,false);
-            rectangle(0.44,-0.41,0.83,0.43,true);
+            rectangle(0.17, -0.68, 1.08, 0.65, false);
+            rectangle(0.44, -0.41, 0.83, 0.43, true);
             c.fill();
-            rectangle(-0.52,-0.90,0.52,-0.75,false);
-            rectangle(-0.30,-0.90,0.30,-0.78,true);
+            rectangle(-0.52, -0.90, 0.52, -0.75, false);
+            rectangle(-0.30, -0.90, 0.30, -0.78, true);
             c.fill();
         }
-    } else if(scene == 9) {
+    } else if (scene == 9) {
         // Fractional horizontal and vertical strokes: short segments, caps,
         // thick lines and lines clipped by each edge of the plotting area.
-        for(int index=0;index<10;++index) {
-            const double offset=-0.94+index*0.21;
-            c.set_line_width(0.25+index*0.43);
-            c.move_to(-1.18,offset);
-            c.line_to(1.18,offset);
+        for (int index = 0; index < 10; ++index) {
+            const double offset = -0.94 + index * 0.21;
+            c.set_line_width(0.25 + index * 0.43);
+            c.move_to(-1.18, offset);
+            c.line_to(1.18, offset);
             c.stroke();
-            c.move_to(offset,-1.20);
-            c.line_to(offset,1.20);
+            c.move_to(offset, -1.20);
+            c.line_to(offset, 1.20);
             c.stroke();
         }
         c.set_line_width(4.0);
-        c.move_to(-0.95,-0.96);
-        c.line_to(-0.37,-0.96);
+        c.move_to(-0.95, -0.96);
+        c.line_to(-0.37, -0.96);
         c.stroke();
-        c.move_to(0.77,0.94);
-        c.line_to(0.77,0.78);
+        c.move_to(0.77, 0.94);
+        c.line_to(0.77, 0.78);
         c.stroke();
     }
     c.write(filename);
 }
-
 
 //! \brief Check that axis text remains legible in the generated PNG.
 class TestDefaultRenderingRegression : public Ariadne::Testing::ContextFixture {
   public:
     using ContextFixture::ContextFixture;
 
-void verify_labels(DrawingTest::Image const& image) {
-    
-    auto dark=[&](int x0,int y0,int x1,int y1) {
-        unsigned count=0;
-        for(int y=y0;y<y1;++y) for(int x=x0;x<x1;++x) {
-            const auto colour=image.pixel(static_cast<unsigned>(x),
-                                           static_cast<unsigned>(y));
-            if(colour[0]<90 && colour[1]<90 && colour[2]<90) ++count;
-        }
-        return count;
-    };
-    const int width=static_cast<int>(image.width);
-    const int height=static_cast<int>(image.height);
-    const int plot_height=height-50;
-    const int x_center=160+(width-170)/2;
-    ARIADNE_TESTING_PROVE((dark(x_center-25,height-37,x_center+15,height-2)>=45));
-    ARIADNE_TESTING_PROVE((dark(125,10+plot_height/2-4,159,10+plot_height/2+36)>=65));
-    ARIADNE_TESTING_PROVE((dark(127,8,158,45)>=45));
-}
+    void verify_labels(const DrawingTest::Image& image) {
+        auto dark = [&](int x0, int y0, int x1, int y1) {
+            unsigned count = 0;
+            for (int y = y0; y < y1; ++y)
+                for (int x = x0; x < x1; ++x) {
+                    const auto colour = image.pixel(static_cast<unsigned>(x),
+                                                    static_cast<unsigned>(y));
+                    if (colour[0] < 90 && colour[1] < 90 && colour[2] < 90)
+                        ++count;
+                }
+            return count;
+        };
+        const int width = static_cast<int>(image.width);
+        const int height = static_cast<int>(image.height);
+        const int plot_height = height - 50;
+        const int x_center = 160 + (width - 170) / 2;
+        ARIADNE_TESTING_PROVE((dark(x_center - 25, height - 37, x_center + 15, height - 2) >= 45));
+        ARIADNE_TESTING_PROVE((dark(125, 10 + plot_height / 2 - 4, 159, 10 + plot_height / 2 + 36) >= 65));
+        ARIADNE_TESTING_PROVE((dark(127, 8, 158, 45) >= 45));
+    }
 
-//! \brief Check rectangular compound-path winding semantics.
-void verify_rectangles(DrawingTest::Image const& holes,
-                               DrawingTest::Image const& mixed) {
-    
-    auto expect=[&](DrawingTest::Image const& image,double x,double y,bool filled) {
-        const auto colour=DrawingTest::world_pixel(image,x,y);
-        const bool actual=colour[1]<210 && colour[2]<210;
-        ARIADNE_TESTING_PROVE((actual==filled));
-    };
-    ARIADNE_TESTING_PROVE((holes.width==490 && holes.height==290));
-    ARIADNE_TESTING_PROVE((mixed.width==490 && mixed.height==290));
-    for(const double x:{-0.66,-0.03,0.62}) expect(holes,x,0,false);
-    expect(holes,-0.91,0,true);
-    expect(holes,-0.28,0,true);
-    expect(mixed,-0.60,0,true);
-    expect(mixed,0.64,0,false);
-    expect(mixed,0.94,0,true);
-    expect(mixed,0,-0.82,false);
-    expect(mixed,-0.45,-0.82,true);
-}
-
+    //! \brief Check rectangular compound-path winding semantics.
+    void verify_rectangles(const DrawingTest::Image& holes,
+                           const DrawingTest::Image& mixed) {
+        auto expect = [&](const DrawingTest::Image& image, double x, double y, bool filled) {
+            const auto colour = DrawingTest::world_pixel(image, x, y);
+            const bool actual = colour[1] < 210 && colour[2] < 210;
+            ARIADNE_TESTING_PROVE((actual == filled));
+        };
+        ARIADNE_TESTING_PROVE((holes.width == 490 && holes.height == 290));
+        ARIADNE_TESTING_PROVE((mixed.width == 490 && mixed.height == 290));
+        for (const double x: {-0.66, -0.03, 0.62})
+            expect(holes, x, 0, false);
+        expect(holes, -0.91, 0, true);
+        expect(holes, -0.28, 0, true);
+        expect(mixed, -0.60, 0, true);
+        expect(mixed, 0.64, 0, false);
+        expect(mixed, 0.94, 0, true);
+        expect(mixed, 0, -0.82, false);
+        expect(mixed, -0.45, -0.82, true);
+    }
 
     void test_pixel_exact_goldens() {
-        const auto& directory=ctx().work_directory();
-        auto register_output=[&](std::string const& filename) {
-            auto path=directory/filename;
+        const auto& directory = ctx().work_directory();
+        auto register_output = [&](const std::string& filename) {
+            auto path = directory / filename;
             ctx().artifact(path, filename, "image/png",
                            Ariadne::Testing::ArtifactKind::Output,
                            Ariadne::Testing::ArtifactLifetime::KeepOnFailure);
             return path;
         };
-        auto check_golden=[&](DrawingTest::Image const& image,
-                              std::string const& name) {
-            auto const golden=std::filesystem::path(ARIADNE_RENDERING_GOLDEN_DIR)/name;
-            ctx().artifact(golden, name+" golden", "image/png",
+        auto check_golden = [&](const DrawingTest::Image& image,
+                                const std::string& name) {
+            const auto golden = std::filesystem::path(ARIADNE_RENDERING_GOLDEN_DIR) / name;
+            ctx().artifact(golden, name + " golden", "image/png",
                            Ariadne::Testing::ArtifactKind::Reference);
-            auto const diff=directory/(name+"-golden-diff.ppm");
-            ctx().artifact(diff, name+" pixel difference", "image/x-portable-pixmap",
+            const auto diff = directory / (name + "-golden-diff.ppm");
+            ctx().artifact(diff, name + " pixel difference", "image/x-portable-pixmap",
                            Ariadne::Testing::ArtifactKind::Difference,
                            Ariadne::Testing::ArtifactLifetime::KeepOnFailure);
             ARIADNE_TESTING_EXPECT_NO_THROW(DrawingTest::require_golden_image(
                 image, name, diff.string()));
         };
-        DefaultRenderingCanvas default_rendering(ImageSize2d(320u,240u));
-        const auto figure_file=register_output("comparison-default_rendering.png");
-        render(default_rendering,figure_file.string().c_str());
-        const auto figure_image=DrawingTest::read_default_rendering_png(
+        DefaultRenderingCanvas default_rendering(ImageSize2d(320u, 240u));
+        const auto figure_file = register_output("comparison-default_rendering.png");
+        render(default_rendering, figure_file.string().c_str());
+        const auto figure_image = DrawingTest::read_default_rendering_png(
             figure_file.string());
         verify_labels(figure_image);
 
         // At (329,89), 11/16 green stroke coverage over a 145 channel
         // and a 153 source gives exactly 150.5; rounding must yield 151.
-        ARIADNE_TESTING_PROVE((figure_image.pixel(329u,89u)[1]==151u));
+        ARIADNE_TESTING_PROVE((figure_image.pixel(329u, 89u)[1] == 151u));
 
         // Generate and decode every scene before comparing any golden fixture.
         // A golden mismatch must not prevent collecting the other images for
         // cross-platform diagnostics or an explicitly reviewed baseline update.
         std::vector<DrawingTest::Image> scenes;
         scenes.reserve(10);
-        for(int scene=0;scene<10;++scene) {
-            DefaultRenderingCanvas canvas(ImageSize2d(320u,240u));
-            const std::string name="comparison-scene"+std::to_string(scene)+
-                                   "-default_rendering.png";
-            const auto output=register_output(name);
-            geometry(canvas,output.string().c_str(),scene);
+        for (int scene = 0; scene < 10; ++scene) {
+            DefaultRenderingCanvas canvas(ImageSize2d(320u, 240u));
+            const std::string name = "comparison-scene" + std::to_string(scene) +
+                                     "-default_rendering.png";
+            const auto output = register_output(name);
+            geometry(canvas, output.string().c_str(), scene);
             scenes.push_back(DrawingTest::read_default_rendering_png(output.string()));
         }
 
-        verify_rectangles(scenes[7],scenes[8]);
+        verify_rectangles(scenes[7], scenes[8]);
 
-        check_golden(figure_image,"comparison-default_rendering.png");
-        for(int scene=0;scene<10;++scene) {
-            const std::string name="comparison-scene"+std::to_string(scene)+
-                                   "-default_rendering.png";
-            check_golden(scenes[static_cast<std::size_t>(scene)],name);
+        check_golden(figure_image, "comparison-default_rendering.png");
+        for (int scene = 0; scene < 10; ++scene) {
+            const std::string name = "comparison-scene" + std::to_string(scene) +
+                                     "-default_rendering.png";
+            check_golden(scenes[static_cast<std::size_t>(scene)], name);
         }
     }
 };

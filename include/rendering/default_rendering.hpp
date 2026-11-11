@@ -33,9 +33,9 @@
 #include <cstdint>
 #include <vector>
 
-#include "rendering/rendering_base.hpp"
-#include "rendering/rendering_backend_interface.hpp"
 #include "rendering/image_size.hpp"
+#include "rendering/rendering_backend_interface.hpp"
+#include "rendering/rendering_base.hpp"
 
 namespace Ariadne {
 
@@ -152,7 +152,7 @@ class DefaultRenderingCanvas : public CanvasBase {
     void mark_sample(int x, int y, int sx, int sy);
 
     //! \brief Retrieve or build the lookup table for one paint colour.
-    BlendTable const& blend_table_for(Paint paint);
+    const BlendTable& blend_table_for(Paint paint);
 
     //! \brief Blend the union coverage once and reset the dirty masks.
     void composite_coverage(Paint paint);
@@ -176,7 +176,7 @@ class DefaultRenderingCanvas : public CanvasBase {
     void rasterise_fill();
 
     //! \brief Rasterize small built-in glyphs for axis labels.
-    void text(double x, double y, StringType const& label);
+    void text(double x, double y, const StringType& label);
 };
 
 //! \ingroup RenderingModule

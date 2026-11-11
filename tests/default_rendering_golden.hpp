@@ -29,8 +29,6 @@
 #ifndef ARIADNE_TEST_DEFAULT_RENDERING_GOLDEN_HPP
 #define ARIADNE_TEST_DEFAULT_RENDERING_GOLDEN_HPP
 
-#include "default_rendering_png.hpp"
-
 #include <algorithm>
 #include <array>
 #include <cstdio>
@@ -41,18 +39,20 @@
 #include <string>
 #include <vector>
 
+#include "default_rendering_png.hpp"
+
 namespace DrawingTest {
 
 //! \brief Check the entire RGB image against a reviewed PNG in golden/.
 //! \details The fixture is always read-only. On failure a red-on-black PPM
 //! difference image is written in the test's working directory; each changed
 //! pixel is red with intensity proportional to the largest channel error.
-inline void require_golden_image(Image const& current, std::string const& filename,
-                                 std::string const& difference_filename = {}) {
+inline void require_golden_image(const Image& current, const std::string& filename,
+                                 const std::string& difference_filename = {}) {
     const std::string path = std::string(ARIADNE_RENDERING_GOLDEN_DIR) + "/" + filename;
     const Image reference = read_default_rendering_png(path);
 
-    if(current.width != reference.width || current.height != reference.height) {
+    if (current.width != reference.width || current.height != reference.height) {
         std::ostringstream error;
         error << filename << ": image dimensions differ (actual "
               << current.width << 'x' << current.height << ", golden "
@@ -66,17 +66,18 @@ inline void require_golden_image(Image const& current, std::string const& filena
     std::vector<unsigned char> diagnostic;
     diagnostic.reserve(current.pixels.size() * 3);
 
-    for(std::size_t i = 0; i < current.pixels.size(); ++i) {
+    for (std::size_t i = 0; i < current.pixels.size(); ++i) {
         const auto& actual = current.pixels[i];
         const auto& expected = reference.pixels[i];
         unsigned maximum = 0;
-        for(std::size_t channel = 0; channel < 3; ++channel) {
+        for (std::size_t channel = 0; channel < 3; ++channel) {
             const int delta = static_cast<int>(actual[channel]) -
                               static_cast<int>(expected[channel]);
             maximum = std::max(maximum, static_cast<unsigned>(std::abs(delta)));
         }
-        if(maximum != 0) {
-            if(differences == 0) first_index = i;
+        if (maximum != 0) {
+            if (differences == 0)
+                first_index = i;
             ++differences;
             largest_error = std::max(largest_error, maximum);
         }
@@ -87,8 +88,9 @@ inline void require_golden_image(Image const& current, std::string const& filena
     }
 
     const std::string diff_path = difference_filename.empty()
-        ? filename + "-golden-diff.ppm" : difference_filename;
-    if(differences == 0) {
+                                    ? filename + "-golden-diff.ppm"
+                                    : difference_filename;
+    if (differences == 0) {
         // Avoid confusing an old diagnostic with a fresh successful run.
         (void)std::remove(diff_path.c_str());
         return;
@@ -96,11 +98,14 @@ inline void require_golden_image(Image const& current, std::string const& filena
 
     /** @brief Perform the out operation. */
     std::ofstream out(diff_path, std::ios::binary);
-    if(!out) throw std::runtime_error("Cannot write golden diagnostic: " + diff_path);
-    out << "P6\n" << current.width << ' ' << current.height << "\n255\n";
+    if (!out)
+        throw std::runtime_error("Cannot write golden diagnostic: " + diff_path);
+    out << "P6\n"
+        << current.width << ' ' << current.height << "\n255\n";
     out.write(reinterpret_cast<const char*>(diagnostic.data()),
               static_cast<std::streamsize>(diagnostic.size()));
-    if(!out) throw std::runtime_error("Incomplete golden diagnostic: " + diff_path);
+    if (!out)
+        throw std::runtime_error("Incomplete golden diagnostic: " + diff_path);
 
     std::ostringstream error;
     error << filename << ": " << differences << " changed RGB pixels; first at ("

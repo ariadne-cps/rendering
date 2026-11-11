@@ -26,15 +26,14 @@
  *  @brief Implement figure styling, drawing and export.
  */
 
-#include "utility/standard.hpp"
+#include "rendering/figure.hpp"
 
+#include "rendering/geometry2d.hpp"
+#include "rendering/rendering_manager.hpp"
 #include "utility/macros.hpp"
+#include "utility/standard.hpp"
 #include "utility/stlio.hpp"
 #include "utility/string.hpp"
-#include "rendering/geometry2d.hpp"
-#include "rendering/figure.hpp"
-#include "rendering/rendering_manager.hpp"
-
 
 namespace Ariadne {
 
@@ -42,65 +41,91 @@ static const Int DEFAULT_WIDTH = 800;
 static const Int DEFAULT_HEIGHT = 800;
 
 Colour::Colour()
-    : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
+    : Colour("transparant", 1.0, 1.0, 1.0, 0.0) {}
 Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Dbl op)
-    : Colour("",rd,gr,bl,op) { }
+    : Colour("", rd, gr, bl, op) {}
 Colour::Colour(const char* nm, Dbl rd, Dbl gr, Dbl bl, Dbl op)
-    : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
+    : name(nm), red(rd), green(gr), blue(bl), opacity(op) {}
 OutputStream& operator<<(OutputStream& os, const Colour& c) {
-    return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
+    return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )";
+}
 
+const Colour transparent = Colour();
 
-const Colour transparent=Colour();
+const Colour white = Colour("white", 1.0, 1.0, 1.0);
+const Colour black = Colour("black", 0.0, 0.0, 0.0);
+const Colour red = Colour("red", 1.0, 0.0, 0.0);
+const Colour green = Colour("green", 0.0, 1.0, 0.0);
+const Colour blue = Colour("blue", 0.0, 0.0, 1.0);
+const Colour yellow = Colour("yellow", 1.0, 1.0, 0.0);
+const Colour cyan = Colour("cyan", 0.0, 1.0, 1.0);
+const Colour magenta = Colour("magenta", 1.0, 0.0, 1.0);
+const Colour orange = Colour("orange", 1.0, 0.75, 0.5);
+const Colour grey = Colour("grey", 0.5, 0.5, 0.5);
+const Colour lightgrey = Colour("lightgrey", 0.75, 0.75, 0.75);
+const Colour darkgrey = Colour("darkgrey", 0.25, 0.25, 0.25);
 
-const Colour white=Colour("white",1.0,1.0,1.0);
-const Colour black=Colour("black",0.0,0.0,0.0);
-const Colour red=Colour("red",1.0,0.0,0.0);
-const Colour green=Colour("green",0.0,1.0,0.0);
-const Colour blue=Colour("blue",0.0,0.0,1.0);
-const Colour yellow=Colour("yellow",1.0,1.0,0.0);
-const Colour cyan=Colour("cyan",0.0,1.0,1.0);
-const Colour magenta=Colour("magenta",1.0,0.0,1.0);
-const Colour orange=Colour("orange",1.0,0.75,0.5);
-const Colour grey=Colour("grey",0.5,0.5,0.5);
-const Colour lightgrey=Colour("lightgrey",0.75,0.75,0.75);
-const Colour darkgrey=Colour("darkgrey",0.25,0.25,0.25);
-
-RenderingProperties& RenderingProperties::set_dot_radius(Dbl dr) { this->dot_radius=dr; return *this; }
-RenderingProperties& RenderingProperties::set_line_style(Bool ls) { this->line_style=ls; return *this; }
-RenderingProperties& RenderingProperties::set_line_width(Dbl lw) { this->line_width=lw; return *this; }
-RenderingProperties& RenderingProperties::set_line_colour(Colour lc) { this->line_colour=lc; return *this; }
+RenderingProperties& RenderingProperties::set_dot_radius(Dbl dr) {
+    this->dot_radius = dr;
+    return *this;
+}
+RenderingProperties& RenderingProperties::set_line_style(Bool ls) {
+    this->line_style = ls;
+    return *this;
+}
+RenderingProperties& RenderingProperties::set_line_width(Dbl lw) {
+    this->line_width = lw;
+    return *this;
+}
+RenderingProperties& RenderingProperties::set_line_colour(Colour lc) {
+    this->line_colour = lc;
+    return *this;
+}
 RenderingProperties& RenderingProperties::set_line_colour(Dbl r, Dbl g, Dbl b) {
-    this->set_line_colour(Colour(r,g,b)); return *this; }
-RenderingProperties& RenderingProperties::set_fill_style(Bool fs) { this->fill_style=fs; return *this; }
-RenderingProperties& RenderingProperties::set_fill_opacity(Dbl fo) { this->fill_colour.opacity=fo; return *this; }
-RenderingProperties& RenderingProperties::set_fill_colour(Colour fc) { this->fill_colour=fc; return *this; }
+    this->set_line_colour(Colour(r, g, b));
+    return *this;
+}
+RenderingProperties& RenderingProperties::set_fill_style(Bool fs) {
+    this->fill_style = fs;
+    return *this;
+}
+RenderingProperties& RenderingProperties::set_fill_opacity(Dbl fo) {
+    this->fill_colour.opacity = fo;
+    return *this;
+}
+RenderingProperties& RenderingProperties::set_fill_colour(Colour fc) {
+    this->fill_colour = fc;
+    return *this;
+}
 RenderingProperties& RenderingProperties::set_fill_colour(Dbl r, Dbl g, Dbl b) {
-    this->set_fill_colour(Colour(r,g,b,this->fill_colour.opacity)); return *this; }
-RenderingProperties& RenderingProperties::set_animated(Bool b) { this->is_animated=b; return *this; }
+    this->set_fill_colour(Colour(r, g, b, this->fill_colour.opacity));
+    return *this;
+}
+RenderingProperties& RenderingProperties::set_animated(Bool b) {
+    this->is_animated = b;
+    return *this;
+}
 
-OutputStream& operator<<(OutputStream& os, RenderingProperties const& gp) {
+OutputStream& operator<<(OutputStream& os, const RenderingProperties& gp) {
     return os << "RenderingProperties(" << "dot_radius=" << gp.dot_radius
-        << ", line_style=" << gp.line_style<<", line_width=" << gp.line_width << ", line_colour=" << gp.line_colour
-        << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << ", is_animated=" << gp.is_animated << ")"; }
-
+              << ", line_style=" << gp.line_style << ", line_width=" << gp.line_width << ", line_colour=" << gp.line_colour
+              << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << ", is_animated=" << gp.is_animated << ")";
+}
 
 Void draw(Figure& fig, const Drawable2dInterface& shape) {
     fig.draw(shape);
 }
 
-
 struct RenderingObject {
     RenderingObject(const RenderingProperties& gp, const Drawable2dInterface& sh)
-        : properties(gp), shape_ptr(sh.clone()) { }
+        : properties(gp), shape_ptr(sh.clone()) {}
     RenderingProperties properties;
     std::shared_ptr<const Drawable2dInterface> shape_ptr;
 };
 
-struct Figure::Data
-{
+struct Figure::Data {
     Data(RenderingBoundingBoxType bbx, Projection2d prj)
-        : properties(), projection(prj), bounding_box(bbx), x_label(), y_label() { }
+        : properties(), projection(prj), bounding_box(bbx), x_label(), y_label() {}
 
     RenderingProperties properties;
     Projection2d projection;
@@ -112,14 +137,12 @@ struct Figure::Data
 
 Figure::~Figure() = default;
 
-Figure::Figure(Figure const& other)
-    : _data(std::make_unique<Data>(*other._data))
-{ }
+Figure::Figure(const Figure& other)
+    : _data(std::make_unique<Data>(*other._data)) {}
 
-Figure& Figure::operator=(Figure const& other)
-{
-    if(this!=&other) {
-        this->_data=std::make_unique<Data>(*other._data);
+Figure& Figure::operator=(const Figure& other) {
+    if (this != &other) {
+        this->_data = std::make_unique<Data>(*other._data);
     }
     return *this;
 }
@@ -128,59 +151,53 @@ Figure::Figure(Figure&&) noexcept = default;
 Figure& Figure::operator=(Figure&&) noexcept = default;
 
 Figure::Figure(const RenderingBoundingBoxType& bbx, const Projection2d& proj)
-    : _data(std::make_unique<Data>(bbx,proj))
-{
-    ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
+    : _data(std::make_unique<Data>(bbx, proj)) {
+    ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection " << proj << " must take same number of arguments as the dimension of the bounding box " << bbx);
 }
 
 Figure::Figure(const RenderingBoundingBoxType& bbx, DimensionType ix, DimensionType iy)
-    : Figure(bbx,Projection2d(bbx.dimension(),ix,iy))
-{
-    ARIADNE_ASSERT_MSG(bbx.dimension()>=2,"The bounding box must be at least 2-dimensional.");
+    : Figure(bbx, Projection2d(bbx.dimension(), ix, iy)) {
+    ARIADNE_ASSERT_MSG(bbx.dimension() >= 2, "The bounding box must be at least 2-dimensional.");
 }
 
-Figure::Figure(const RenderingBoundingBoxType& bbx, Pair<DimensionType,DimensionType> ixy)
-    : Figure(bbx,Projection2d(bbx.dimension(),ixy.first,ixy.second))
-{
-    ARIADNE_ASSERT_MSG(bbx.dimension()>=2,"The bounding box must be at least 2-dimensional.");
+Figure::Figure(const RenderingBoundingBoxType& bbx, Pair<DimensionType, DimensionType> ixy)
+    : Figure(bbx, Projection2d(bbx.dimension(), ixy.first, ixy.second)) {
+    ARIADNE_ASSERT_MSG(bbx.dimension() >= 2, "The bounding box must be at least 2-dimensional.");
 }
 
-Figure& Figure::draw(const Drawable2dInterface& shape)
-{
-    this->_data->objects.push_back(RenderingObject(this->_data->properties,shape)); return *this;
-}
-
-Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy)
-{
-    ARIADNE_ASSERT_MSG(as==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
-    this->_data->projection=Projection2d(as,ix,iy); return *this;
-}
-
-Figure& Figure::set_projection_map(const Projection2d& p)
-{
-    ARIADNE_ASSERT_MSG(p.argument_size()==this->get_bounding_box().dimension(),"The bounding box must have the same argument size as the projection.");
-    this->_data->projection=p; return *this;
-}
-
-Figure& Figure::set_bounding_box(const RenderingBoundingBoxType& bx)
-{
-    this->_data->bounding_box=bx; return *this;
-}
-
-Projection2d Figure::get_2d_projection_map() const
-{
-    return this->_data->projection;
-}
-
-Figure& Figure::set_axis_labels(StringType const& x, StringType const& y)
-{
-    this->_data->x_label=x;
-    this->_data->y_label=y;
+Figure& Figure::draw(const Drawable2dInterface& shape) {
+    this->_data->objects.push_back(RenderingObject(this->_data->properties, shape));
     return *this;
 }
 
-RenderingBoundingBoxType Figure::get_bounding_box() const
-{
+Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy) {
+    ARIADNE_ASSERT_MSG(as == this->get_bounding_box().dimension(), "The bounding box must have the same argument size as the projection.");
+    this->_data->projection = Projection2d(as, ix, iy);
+    return *this;
+}
+
+Figure& Figure::set_projection_map(const Projection2d& p) {
+    ARIADNE_ASSERT_MSG(p.argument_size() == this->get_bounding_box().dimension(), "The bounding box must have the same argument size as the projection.");
+    this->_data->projection = p;
+    return *this;
+}
+
+Figure& Figure::set_bounding_box(const RenderingBoundingBoxType& bx) {
+    this->_data->bounding_box = bx;
+    return *this;
+}
+
+Projection2d Figure::get_2d_projection_map() const {
+    return this->_data->projection;
+}
+
+Figure& Figure::set_axis_labels(const StringType& x, const StringType& y) {
+    this->_data->x_label = x;
+    this->_data->y_label = y;
+    return *this;
+}
+
+RenderingBoundingBoxType Figure::get_bounding_box() const {
     return this->_data->bounding_box;
 }
 
@@ -192,170 +209,168 @@ const RenderingProperties& Figure::properties() const {
     return this->_data->properties;
 }
 
-Figure& Figure::set_dot_radius(Dbl dr)
-{
-    this->_data->properties.dot_radius=dr; return *this;
+Figure& Figure::set_dot_radius(Dbl dr) {
+    this->_data->properties.dot_radius = dr;
+    return *this;
 }
 
-Figure& Figure::set_line_style(Bool ls)
-{
-    this->_data->properties.line_style=ls; return *this;
+Figure& Figure::set_line_style(Bool ls) {
+    this->_data->properties.line_style = ls;
+    return *this;
 }
 
-Figure& Figure::set_line_width(Dbl lw)
-{
-    this->_data->properties.line_width=lw; return *this;
+Figure& Figure::set_line_width(Dbl lw) {
+    this->_data->properties.line_width = lw;
+    return *this;
 }
 
-Figure& Figure::set_line_colour(Colour lc)
-{
-    this->_data->properties.line_colour=lc; return *this;
+Figure& Figure::set_line_colour(Colour lc) {
+    this->_data->properties.line_colour = lc;
+    return *this;
 }
 
-Figure& Figure::set_line_colour(Dbl r, Dbl g, Dbl b)
-{
-    this->set_line_colour(Colour(r,g,b)); return *this;
+Figure& Figure::set_line_colour(Dbl r, Dbl g, Dbl b) {
+    this->set_line_colour(Colour(r, g, b));
+    return *this;
 }
 
-Figure& Figure::set_fill_style(Bool fs)
-{
-    this->_data->properties.fill_style=fs; return *this;
+Figure& Figure::set_fill_style(Bool fs) {
+    this->_data->properties.fill_style = fs;
+    return *this;
 }
 
-Figure& Figure::set_fill_opacity(Dbl fo)
-{
-    this->_data->properties.fill_colour.opacity=fo; return *this;
+Figure& Figure::set_fill_opacity(Dbl fo) {
+    this->_data->properties.fill_colour.opacity = fo;
+    return *this;
 }
 
-Figure& Figure::set_fill_colour(Colour fc)
-{
-    this->_data->properties.fill_colour=fc; return *this;
+Figure& Figure::set_fill_colour(Colour fc) {
+    this->_data->properties.fill_colour = fc;
+    return *this;
 }
 
-Figure& Figure::set_fill_colour(Dbl r, Dbl g, Dbl b)
-{
-    this->set_fill_colour(Colour(r,g,b,this->_data->properties.fill_colour.opacity)); return *this;
+Figure& Figure::set_fill_colour(Dbl r, Dbl g, Dbl b) {
+    this->set_fill_colour(Colour(r, g, b, this->_data->properties.fill_colour.opacity));
+    return *this;
 }
 
-Bool Figure::get_line_style() const
-{
+Bool Figure::get_line_style() const {
     return this->_data->properties.line_style;
 }
 
-Dbl Figure::get_line_width() const
-{
+Dbl Figure::get_line_width() const {
     return this->_data->properties.line_width;
 }
 
-Dbl Figure::get_dot_radius() const
-{
+Dbl Figure::get_dot_radius() const {
     return this->_data->properties.dot_radius;
 }
 
-Colour Figure::get_line_colour() const
-{
+Colour Figure::get_line_colour() const {
     return this->_data->properties.line_colour;
 }
 
-
-Bool Figure::get_fill_style() const
-{
+Bool Figure::get_fill_style() const {
     return this->_data->properties.fill_style;
 }
 
-Dbl Figure::get_fill_opacity() const
-{
+Dbl Figure::get_fill_opacity() const {
     return this->_data->properties.fill_colour.opacity;
 }
 
-Colour Figure::get_fill_colour() const
-{
+Colour Figure::get_fill_colour() const {
     return this->_data->properties.fill_colour;
 }
 
 Figure& Figure::clear() {
-    this->_data->objects.clear(); return *this;
+    this->_data->objects.clear();
+    return *this;
 }
 
-Figure& Figure::set_animated(Bool b){
-    this->_data->properties.is_animated = b; return *this;
+Figure& Figure::set_animated(Bool b) {
+    this->_data->properties.is_animated = b;
+    return *this;
 }
 
 Figure& operator<<(Figure& fig, const Drawable2dInterface& shape) {
-    fig.draw(shape); return fig;
+    fig.draw(shape);
+    return fig;
 }
 
 Void set_properties(CanvasInterface& canvas, const RenderingProperties& properties) {
-    const Colour& line_colour=properties.line_colour;
-    const Colour& fill_colour=properties.fill_colour;
-    if (properties.line_style==false) { canvas.set_line_width(0); }
-    else { canvas.set_line_width(properties.line_width); }
-    if (properties.fill_style==false) { canvas.set_fill_opacity(0); }
-    else { canvas.set_fill_opacity(properties.fill_colour.opacity); }
+    const Colour& line_colour = properties.line_colour;
+    const Colour& fill_colour = properties.fill_colour;
+    if (properties.line_style == false) {
+        canvas.set_line_width(0);
+    } else {
+        canvas.set_line_width(properties.line_width);
+    }
+    if (properties.fill_style == false) {
+        canvas.set_fill_opacity(0);
+    } else {
+        canvas.set_fill_opacity(properties.fill_colour.opacity);
+    }
     canvas.set_fill_colour(fill_colour.red, fill_colour.green, fill_colour.blue);
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }
 
-Void Figure::_paint_all(CanvasInterface& canvas) const
-{
-    DimensionType dimension=this->_data->projection.argument_size();
+Void Figure::_paint_all(CanvasInterface& canvas) const {
+    DimensionType dimension = this->_data->projection.argument_size();
 
-    RenderingBoundingBoxType bounding_box=this->_data->bounding_box;
-    const Projection2d projection=this->_data->projection;
+    RenderingBoundingBoxType bounding_box = this->_data->bounding_box;
+    const Projection2d projection = this->_data->projection;
 
     // Don't attempt to compute a bounding box, as this relies on
     // a drawable object having one. Instead, the bounding box must be
     // specified explicitly
-    if(bounding_box.dimension()==0) {
-        bounding_box=RenderingBoundingBoxType(dimension,RenderingInterval(-1.0,1.0));
+    if (bounding_box.dimension() == 0) {
+        bounding_box = RenderingBoundingBoxType(dimension, RenderingInterval(-1.0, 1.0));
     }
 
     // Check projection and bounding box have same values.
-    ARIADNE_ASSERT_MSG(bounding_box.dimension()==projection.argument_size(),"bounding_box="<<bounding_box<<", projection="<<projection);
-    ARIADNE_ASSERT(bounding_box.dimension()>projection.x_coordinate());
-    ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
+    ARIADNE_ASSERT_MSG(bounding_box.dimension() == projection.argument_size(), "bounding_box=" << bounding_box << ", projection=" << projection);
+    ARIADNE_ASSERT(bounding_box.dimension() > projection.x_coordinate());
+    ARIADNE_ASSERT(bounding_box.dimension() > projection.y_coordinate());
 
     // Project the bounding box onto the canvas
-    Dbl xl=bounding_box[projection.x_coordinate()].lower_bound();
-    Dbl xu=bounding_box[projection.x_coordinate()].upper_bound();
-    Dbl yl=bounding_box[projection.y_coordinate()].lower_bound();
-    Dbl yu=bounding_box[projection.y_coordinate()].upper_bound();
+    Dbl xl = bounding_box[projection.x_coordinate()].lower_bound();
+    Dbl xu = bounding_box[projection.x_coordinate()].upper_bound();
+    Dbl yl = bounding_box[projection.y_coordinate()].lower_bound();
+    Dbl yu = bounding_box[projection.y_coordinate()].upper_bound();
 
-    StringType tx=this->_data->x_label.empty() ? String("x")+to_str(projection.x_coordinate()) : this->_data->x_label;
-    StringType ty=this->_data->y_label.empty() ? String("x")+to_str(projection.y_coordinate()) : this->_data->y_label;
+    StringType tx = this->_data->x_label.empty() ? String("x") + to_str(projection.x_coordinate()) : this->_data->x_label;
+    StringType ty = this->_data->y_label.empty() ? String("x") + to_str(projection.y_coordinate()) : this->_data->y_label;
 
-    canvas.initialise(tx,ty,xl,xu,yl,yu);
+    canvas.initialise(tx, ty, xl, xu, yl, yu);
 
     // Draw shapes
-    for(const RenderingObject& object : this->_data->objects) {
-
-        const Drawable2dInterface& shape=object.shape_ptr.operator*();
-        if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
-        ARIADNE_ASSERT(dimension==shape.dimension());
+    for (const RenderingObject& object: this->_data->objects) {
+        const Drawable2dInterface& shape = object.shape_ptr.operator*();
+        if (shape.dimension() == 0) {
+            break;
+        } // The dimension may be equal to two for certain empty sets.
+        ARIADNE_ASSERT(dimension == shape.dimension());
         set_properties(canvas, object.properties);
-        shape.draw(canvas,this->_data->projection);
+        shape.draw(canvas, this->_data->projection);
     }
 }
 
-Void
-Figure::write(const Char* cfilename) const
-{
+Void Figure::write(const Char* cfilename) const {
     this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
-  
-Void
-Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) const
-{
-    SharedPointer<CanvasInterface> canvas=RenderingManager::instance().backend().make_canvas(cfilename,drawing_width,drawing_height, this->_data->properties.is_animated);
+
+Void Figure::write(const Char* cfilename, Nat drawing_width, Nat drawing_height) const {
+    SharedPointer<CanvasInterface> canvas = RenderingManager::instance().backend().make_canvas(cfilename, drawing_width, drawing_height, this->_data->properties.is_animated);
 
     this->_paint_all(*canvas);
     canvas->write(cfilename);
 }
 
-Void plot(const char* filename, const Projection2d& pr, const RenderingBoundingBoxType& bbox, List<Pair<Colour,Drawable2dInterface const&>> const& csets) {
-    Figure fig(bbox,pr);
-    for (auto cset : csets) {
-        fig.set_fill_colour(cset.first); fig << cset.second;
+Void plot(const char* filename, const Projection2d& pr, const RenderingBoundingBoxType& bbox, const List<Pair<Colour, const Drawable2dInterface&>>& csets) {
+    Figure fig(bbox, pr);
+    for (auto cset: csets) {
+        fig.set_fill_colour(cset.first);
+        fig << cset.second;
     }
     fig.write(filename);
 }

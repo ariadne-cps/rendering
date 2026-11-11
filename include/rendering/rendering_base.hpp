@@ -29,8 +29,8 @@
 #ifndef ARIADNE_RENDERING_BASE_HPP
 #define ARIADNE_RENDERING_BASE_HPP
 
-#include "rendering_interface.hpp"
 #include "geometry2d.hpp"
+#include "rendering_interface.hpp"
 
 namespace Ariadne {
 
@@ -38,19 +38,20 @@ namespace Ariadne {
 class CanvasBase : public CanvasInterface {
   public:
     /** @brief Perform the fill boundary canvas operation. */
-    Void fill_boundary(List<Point2d> const& boundary) override final {
-        if(boundary.size()==1) { this->dot(boundary[0].x,boundary[0].y); }
-
-        this->move_to(boundary[0].x,boundary[0].y);
-        for(SizeType i=1; i!=boundary.size(); ++i) {
-            this->line_to(boundary[i].x,boundary[i].y);
+    Void fill_boundary(const List<Point2d>& boundary) override final {
+        if (boundary.size() == 1) {
+            this->dot(boundary[0].x, boundary[0].y);
         }
-        this->line_to(boundary[0].x,boundary[0].y);
+
+        this->move_to(boundary[0].x, boundary[0].y);
+        for (SizeType i = 1; i != boundary.size(); ++i) {
+            this->line_to(boundary[i].x, boundary[i].y);
+        }
+        this->line_to(boundary[0].x, boundary[0].y);
         this->fill();
     }
 };
 
 } // namespace Ariadne
-
 
 #endif // ARIADNE_RENDERING_BASE_HPP

@@ -29,53 +29,52 @@
 #ifndef ARIADNE_NULL_RENDERING_HPP
 #define ARIADNE_NULL_RENDERING_HPP
 
-#include "rendering/rendering_interface.hpp"
 #include "rendering/geometry2d.hpp"
 #include "rendering/rendering_backend_interface.hpp"
+#include "rendering/rendering_interface.hpp"
 
 namespace Ariadne {
 
 /** @brief Provide a canvas that ignores drawing operations. */
-class NullCanvas : public CanvasInterface
-{
-public:
+class NullCanvas : public CanvasInterface {
+  public:
     /** @brief Initialize the canvas coordinate system. */
-    virtual Void initialise(StringType, StringType, double, double, double, double) { }
+    virtual Void initialise(StringType, StringType, double, double, double, double) {}
     /** @brief Finish the drawing operation. */
-    virtual Void finalise() { }
+    virtual Void finalise() {}
 
     /** @brief Write the rendered output to the requested file. */
-    virtual Void write(const char*) const { }
+    virtual Void write(const char*) const {}
 
     /** @brief Move the current path to a coordinate. */
-    virtual Void move_to(double, double) { }
+    virtual Void move_to(double, double) {}
     /** @brief Append a line segment to the current path. */
-    virtual Void line_to(double, double) { }
+    virtual Void line_to(double, double) {}
     /** @brief Append a circle to the current path. */
-    virtual Void circle(double, double, double) { }
+    virtual Void circle(double, double, double) {}
     /** @brief Draw a point using the current dot radius. */
-    virtual Void dot(double, double) { }
+    virtual Void dot(double, double) {}
     /** @brief Stroke the current drawing path. */
-    virtual Void stroke() { }
+    virtual Void stroke() {}
     /** @brief Fill the current drawing path. */
-    virtual Void fill() { }
+    virtual Void fill() {}
 
     /** @brief Provide the fill boundary operation. */
-    virtual Void fill_boundary(List<Point2d> const&) { }
+    virtual Void fill_boundary(const List<Point2d>&) {}
 
     /** @brief Set line width. */
-    virtual Void set_line_width(double) { }
+    virtual Void set_line_width(double) {}
     /** @brief Set line colour. */
-    virtual Void set_line_colour(double, double, double) { }
+    virtual Void set_line_colour(double, double, double) {}
     /** @brief Set fill opacity. */
-    virtual Void set_fill_opacity(double) { }
+    virtual Void set_fill_opacity(double) {}
     /** @brief Set fill colour. */
-    virtual Void set_fill_colour(double, double, double) { }
+    virtual Void set_fill_colour(double, double, double) {}
 
     /** @brief Provide the scaling operation. */
-    virtual Vector2d scaling() const { return Vector2d(0,0); }
+    virtual Vector2d scaling() const { return Vector2d(0, 0); }
     /** @brief Provide the bounds operation. */
-    virtual Box2d bounds() const { return Box2d(0,0,0,0); }
+    virtual Box2d bounds() const { return Box2d(0, 0, 0, 0); }
 };
 
 /** @brief Create no-op canvases for disabled drawing. */
@@ -88,5 +87,4 @@ class NullRenderingBackend : public RenderingBackendInterface {
 } // namespace Ariadne
 
 #endif // ARIADNE_NULL_RENDERING_HPP
-
 
