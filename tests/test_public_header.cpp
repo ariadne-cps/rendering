@@ -1,7 +1,29 @@
-/*
- * This file is part of Ariadne, licensed under GPL-3.0-or-later.
+/***************************************************************************
+ *            tests/test_public_header.cpp
  *
- * Standalone consumer smoke test: include only the public umbrella header.
+ *  Copyright  2026  Luca Geretti
+ *
+ ****************************************************************************/
+
+/*
+ *  This file is part of Ariadne Rendering.
+ *
+ *  Ariadne Rendering is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Ariadne Rendering is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne Rendering. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/** @file tests/test_public_header.cpp
+ *  @brief Check usability of the public umbrella header.
  */
 
 #include "ariadne-rendering.hpp"
