@@ -61,6 +61,7 @@ enum class ProjType{ no_proj, x1_proj, x2_proj };
 /** @brief Select two coordinates from an N-dimensional drawing space. */
 struct Projection2d {
     DimensionType n, i, j;
+    /** @brief Construct a projection by specifying the source dimension and two coordinates. */
     Projection2d(DimensionType nn, DimensionType ii, DimensionType jj) : n(nn), i(ii), j(jj) { }
     /** @brief Return argument size. */
     DimensionType argument_size() const { return n; }

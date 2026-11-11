@@ -37,6 +37,7 @@ namespace Ariadne {
 //! \brief Manager for rendering preferences and global setup
 class RenderingManager {
   private:
+    /** @brief Create the manager with its initial rendering backend. */
     RenderingManager();
   public:
     //! \brief Disable copy construction

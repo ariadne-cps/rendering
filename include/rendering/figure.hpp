@@ -81,8 +81,10 @@ inline Animated set_animated(Bool b) { return Animated(b); }
 
 /** @brief Collect the current styling options for a figure. */
 struct RenderingProperties {
+    /** @brief Construct default figure styles. */
     RenderingProperties()
         : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(orange), is_animated(false) { }
+    /** @brief Construct figure styles from line and fill settings. */
     RenderingProperties(Bool ls, Dbl lw, Dbl dr, Colour lc, Bool fs, Colour fc)
         : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc), is_animated(false) { }
     Dbl dot_radius;
@@ -130,10 +132,13 @@ class Figure
     : public FigureInterface
 {
   public:
+    /** @brief Destroy the figure and its owned drawing data. */
     ~Figure();
+    /** @brief Copy a figure and its drawing data. */
     Figure(Figure const&);
     /** @brief Provide the operator= operation. */
     Figure& operator=(Figure const&);
+    /** @brief Move the figure and its drawing data. */
     Figure(Figure&&) noexcept;
     /** @brief Provide the operator= operation. */
     Figure& operator=(Figure&&) noexcept;
@@ -146,12 +151,15 @@ class Figure
 
     // Mathematical box conversions are supplied via ADL by the drawing module.
     // No mathematics-specific type is mentioned or instantiated in rendering.
+    /** @brief Construct from an externally adapted box and a projection. */
     template<class B>
     Figure(B const& box, Projection2d const& projection)
         : Figure(to_rendering_box(box),projection) { }
+    /** @brief Construct from an adapted box and selected coordinate axes. */
     template<class B>
     Figure(B const& box, DimensionType i, DimensionType j)
         : Figure(to_rendering_box(box),i,j) { }
+    /** @brief Construct from an adapted box and a coordinate pair. */
     template<class B>
     Figure(B const& box, Pair<DimensionType,DimensionType> coordinates)
         : Figure(to_rendering_box(box),coordinates) { }

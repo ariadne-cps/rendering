@@ -37,7 +37,9 @@ namespace Ariadne {
 /** @brief Represent the pixel width and height of a raster image. */
 struct ImageSize2d {
     Nat nx, ny;
+    /** @brief Construct a raster size from unsigned pixel dimensions. */
     ImageSize2d(Nat x, Nat y) : nx(x), ny(y) { }
+    /** @brief Construct a raster size from signed positive pixel dimensions. */
     ImageSize2d(Int x, Int y) {
         ARIADNE_PRECONDITION(x > 0 && y > 0);
         nx = static_cast<Nat>(x);

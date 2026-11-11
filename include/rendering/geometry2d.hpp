@@ -75,6 +75,7 @@ inline OutputStream& operator<<(OutputStream& os, const Point2d& pt) {
 /** @brief Store rectangular display bounds. */
 struct Box2d {
     double xl,xu,yl,yu; Box2d() { }
+    /** @brief Construct a rectangular box from four bounds. */
     Box2d(double xl_, double xu_, double yl_, double yu_) : xl(xl_), xu(xu_), yl(yl_), yu(yu_) { }
 };
 /** @brief Provide the operator<< operation. */
@@ -87,6 +88,7 @@ struct Polytope2d
 {
     List<Point2d> boundary;
   public:
+    /** @brief Construct a drawable polygon from its boundary vertices. */
     Polytope2d(List<Point2d> bd_) : boundary(bd_) { }
     /** @brief Return number of vertices. */
     SizeType number_of_vertices() const { return boundary.size(); }

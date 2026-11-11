@@ -39,6 +39,7 @@ namespace Ariadne {
 //! A pair of display-coordinate bounds, unrelated to arithmetic intervals.
 struct RenderingInterval {
     double lower, upper;
+    /** @brief Construct an interval from lower and upper display bounds. */
     RenderingInterval(double l, double u) : lower(l), upper(u) { }
     /** @brief Return lower bound. */
     double lower_bound() const { return lower; }
@@ -53,10 +54,13 @@ inline OutputStream& operator<<(OutputStream& os, RenderingInterval const& inter
 //! An N-dimensional viewing region containing only primitive coordinates.
 class RenderingBox {
   public:
+    /** @brief Construct an empty viewing box. */
     RenderingBox() = default;
     /** @brief Perform the RenderingBox operation. */
     explicit RenderingBox(DimensionType n) : _intervals(n,RenderingInterval(-1.0,1.0)) { }
+    /** @brief Construct a viewing box by repeating the supplied interval. */
     RenderingBox(DimensionType n, RenderingInterval interval) : _intervals(n,interval) { }
+    /** @brief Construct a viewing box from explicit intervals. */
     RenderingBox(std::initializer_list<RenderingInterval> intervals) : _intervals(intervals) { }
 
     /** @brief Return dimension. */

@@ -39,8 +39,11 @@ namespace Ariadne {
 
 /** @brief Store named RGB channels and opacity for rendering. */
 struct Colour {
+    /** @brief Construct a transparent default colour. */
     Colour();
+    /** @brief Construct a colour from RGB channels and optional opacity. */
     Colour(double rd, double gr, double bl, double op=1.0);
+    /** @brief Construct a named colour with RGB channels and opacity. */
     Colour(const char* nm, double rd, double gr, double bl, double op=1.0);
     StringType name;
     double red, green, blue;
