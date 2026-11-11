@@ -1,4 +1,5 @@
 # Ariadne Rendering
+[![Format](https://github.com/ariadne-cps/rendering/actions/workflows/format.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/format.yml)
 
  [![macOS Status](https://github.com/ariadne-cps/rendering/actions/workflows/macos.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/macos.yml)
 [![Ubuntu Status](https://github.com/ariadne-cps/rendering/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/ariadne-cps/rendering/actions/workflows/ubuntu.yml)
