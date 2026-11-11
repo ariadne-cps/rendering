@@ -82,10 +82,8 @@ inline Animated set_animated(Bool b) { return Animated(b); }
 /** @brief Collect the current styling options for a figure. */
 struct RenderingProperties {
     RenderingProperties()
-        /** @brief Provide the dot radius operation. */
         : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(orange), is_animated(false) { }
     RenderingProperties(Bool ls, Dbl lw, Dbl dr, Colour lc, Bool fs, Colour fc)
-        /** @brief Provide the dot radius operation. */
         : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc), is_animated(false) { }
     Dbl dot_radius;
     Bool line_style;
@@ -150,15 +148,12 @@ class Figure
     // No mathematics-specific type is mentioned or instantiated in rendering.
     template<class B>
     Figure(B const& box, Projection2d const& projection)
-        /** @brief Provide the Figure operation. */
         : Figure(to_rendering_box(box),projection) { }
     template<class B>
     Figure(B const& box, DimensionType i, DimensionType j)
-        /** @brief Provide the Figure operation. */
         : Figure(to_rendering_box(box),i,j) { }
     template<class B>
     Figure(B const& box, Pair<DimensionType,DimensionType> coordinates)
-        /** @brief Provide the Figure operation. */
         : Figure(to_rendering_box(box),coordinates) { }
 
     /** @brief Set projection map. */
