@@ -1,29 +1,29 @@
 /***************************************************************************
- *            default_rendering_golden.hpp
+ *            tests/default_rendering_golden.hpp
  *
  *  Copyright  2026  Luca Geretti
  *
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of Ariadne Rendering.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  Ariadne Rendering is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  Ariadne Rendering is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with Ariadne Rendering. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file default_rendering_golden.hpp
- *  \brief Pixel-exact regression checks against versioned PNG golden images.
+/** @file tests/default_rendering_golden.hpp
+ *  @brief Pixel-exact comparison against reference raster images.
  */
 
 #ifndef ARIADNE_TEST_DEFAULT_RENDERING_GOLDEN_HPP
@@ -94,6 +94,7 @@ inline void require_golden_image(Image const& current, std::string const& filena
         return;
     }
 
+    /** @brief Perform the out operation. */
     std::ofstream out(diff_path, std::ios::binary);
     if(!out) throw std::runtime_error("Cannot write golden diagnostic: " + diff_path);
     out << "P6\n" << current.width << ' ' << current.height << "\n255\n";

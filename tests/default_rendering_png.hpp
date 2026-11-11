@@ -1,29 +1,29 @@
 /***************************************************************************
- *            tests/rendering/default_rendering_png.hpp
+ *            tests/default_rendering_png.hpp
  *
  *  Copyright  2026  Luca Geretti
  *
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of Ariadne Rendering.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  Ariadne Rendering is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  Ariadne Rendering is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with Ariadne Rendering. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file tests/rendering/default_rendering_png.hpp
- *  \brief Minimal C++ reader for PNGs emitted by the default rendering backend.
+/** @file tests/default_rendering_png.hpp
+ *  @brief PNG decoding and pixel inspection for rendering tests.
  */
 
 #ifndef ARIADNE_TEST_DEFAULT_RENDERING_PNG_HPP
@@ -75,8 +75,10 @@ inline std::uint32_t crc32(std::vector<unsigned char> const& b,
 // Read the self-contained Default rendering backend's stored-block PNG.
 //! \brief Decode the stored-block RGBA8 PNG emitted by Default rendering.
 inline Image read_default_rendering_png(std::string const& name) {
+    /** @brief Perform the file operation. */
     std::ifstream file(name,std::ios::binary);
     if(!file) throw std::runtime_error("Cannot open "+name);
+    /** @brief Perform the bytes operation. */
     std::vector<unsigned char> bytes((std::istreambuf_iterator<char>(file)),
                                       std::istreambuf_iterator<char>());
     const std::array<unsigned char,8> signature{137,80,78,71,13,10,26,10};
@@ -91,6 +93,7 @@ inline Image read_default_rendering_png(std::string const& name) {
         const std::size_t data=pos+8;
         if(big32(bytes,data+len)!=crc32(bytes,pos+4,4+len))
             throw std::runtime_error("PNG CRC mismatch");
+        /** @brief Perform the type operation. */
         const std::string type(bytes.begin()+static_cast<std::ptrdiff_t>(pos+4),
                                bytes.begin()+static_cast<std::ptrdiff_t>(pos+8));
         if(type=="IHDR") {

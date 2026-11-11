@@ -6,24 +6,24 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of Ariadne Rendering.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  Ariadne Rendering is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  Ariadne Rendering is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with Ariadne Rendering. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file rendering/rendering_base.hpp
- *  \brief Base rendering implementation.
+/** @file rendering/rendering_base.hpp
+ *  @brief Common canvas drawing helpers.
  */
 
 #ifndef ARIADNE_RENDERING_BASE_HPP
@@ -37,6 +37,7 @@ namespace Ariadne {
 //! \brief Base for canvas classes
 class CanvasBase : public CanvasInterface {
   public:
+    /** @brief Perform the fill boundary canvas operation. */
     Void fill_boundary(List<Point2d> const& boundary) override final {
         if(boundary.size()==1) { this->dot(boundary[0].x,boundary[0].y); }
 
