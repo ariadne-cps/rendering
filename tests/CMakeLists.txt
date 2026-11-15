@@ -16,7 +16,7 @@ foreach(TEST ${UNIT_TESTS})
         target_compile_definitions(${TEST} PRIVATE
             ARIADNE_RENDERING_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden")
     endif()
-    add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}> --concise)
+    ariadne_add_silent_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}> --concise)
     if(WIN32)
         set_tests_properties(${TEST} PROPERTIES
             ENVIRONMENT_MODIFICATION
