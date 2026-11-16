@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "rendering/recording_canvas.hpp"
+
 #include "ariadne-testing.hpp"
 
 using namespace Ariadne;

@@ -47,49 +47,99 @@ class RecordingCanvas final : public CanvasBase {
 
     //! Replay the recorded commands in their original order.
     void replay(CanvasInterface& target) const {
-        for (const auto& cmd : _commands) {
+        for (const auto& cmd: _commands) {
             const auto& a = cmd.args;
             switch (cmd.operation) {
-                case Operation::INITIALISE: target.initialise(cmd.x_label, cmd.y_label, a[0], a[1], a[2], a[3]); break;
-                case Operation::FINALISE: target.finalise(); break;
-                case Operation::MOVE_TO: target.move_to(a[0], a[1]); break;
-                case Operation::LINE_TO: target.line_to(a[0], a[1]); break;
-                case Operation::CIRCLE: target.circle(a[0], a[1], a[2]); break;
-                case Operation::DOT: target.dot(a[0], a[1]); break;
-                case Operation::STROKE: target.stroke(); break;
-                case Operation::FILL: target.fill(); break;
-                case Operation::LINE_WIDTH: target.set_line_width(a[0]); break;
-                case Operation::LINE_COLOUR: target.set_line_colour(a[0], a[1], a[2]); break;
-                case Operation::FILL_COLOUR: target.set_fill_colour(a[0], a[1], a[2]); break;
-                case Operation::FILL_OPACITY: target.set_fill_opacity(a[0]); break;
-                default: throw std::logic_error("Unknown recording canvas command");
+                case Operation::INITIALISE:
+                    target.initialise(cmd.x_label, cmd.y_label, a[0], a[1], a[2], a[3]);
+                    break;
+                case Operation::FINALISE:
+                    target.finalise();
+                    break;
+                case Operation::MOVE_TO:
+                    target.move_to(a[0], a[1]);
+                    break;
+                case Operation::LINE_TO:
+                    target.line_to(a[0], a[1]);
+                    break;
+                case Operation::CIRCLE:
+                    target.circle(a[0], a[1], a[2]);
+                    break;
+                case Operation::DOT:
+                    target.dot(a[0], a[1]);
+                    break;
+                case Operation::STROKE:
+                    target.stroke();
+                    break;
+                case Operation::FILL:
+                    target.fill();
+                    break;
+                case Operation::LINE_WIDTH:
+                    target.set_line_width(a[0]);
+                    break;
+                case Operation::LINE_COLOUR:
+                    target.set_line_colour(a[0], a[1], a[2]);
+                    break;
+                case Operation::FILL_COLOUR:
+                    target.set_fill_colour(a[0], a[1], a[2]);
+                    break;
+                case Operation::FILL_OPACITY:
+                    target.set_fill_opacity(a[0]);
+                    break;
+                default:
+                    throw std::logic_error("Unknown recording canvas command");
             }
         }
     }
 
     void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) override {
-        _commands.push_back({Operation::INITIALISE, {lx, ux, ly, uy}, std::move(x), std::move(y)});
+        _commands.push_back({
+            Operation::INITIALISE, {lx, ux, ly, uy},
+             std::move(x), std::move(y)
+        });
     }
     void finalise() override { _commands.push_back({Operation::FINALISE}); }
     // Export is intentionally not deferred: recording is not itself a raster.
     void write(const char*) const override {
         throw std::logic_error("RecordingCanvas cannot write an image; replay into a rendering canvas first");
     }
-    void move_to(double x, double y) override { _commands.push_back({Operation::MOVE_TO, {x, y}}); }
-    void line_to(double x, double y) override { _commands.push_back({Operation::LINE_TO, {x, y}}); }
-    void circle(double x, double y, double radius) override { _commands.push_back({Operation::CIRCLE, {x, y, radius}}); }
-    void dot(double x, double y) override { _commands.push_back({Operation::DOT, {x, y}}); }
+    void move_to(double x, double y) override { _commands.push_back({
+        Operation::MOVE_TO, {x, y}
+ }); }
+    void line_to(double x, double y) override { _commands.push_back({
+        Operation::LINE_TO, {x, y}
+ }); }
+    void circle(double x, double y, double radius) override { _commands.push_back({
+        Operation::CIRCLE, {x, y, radius}
+ }); }
+    void dot(double x, double y) override { _commands.push_back({
+        Operation::DOT, {x, y}
+ }); }
     void stroke() override { _commands.push_back({Operation::STROKE}); }
     void fill() override { _commands.push_back({Operation::FILL}); }
     void set_line_width(double width) override { _commands.push_back({Operation::LINE_WIDTH, {width}}); }
-    void set_line_colour(double r, double g, double b) override { _commands.push_back({Operation::LINE_COLOUR, {r, g, b}}); }
-    void set_fill_colour(double r, double g, double b) override { _commands.push_back({Operation::FILL_COLOUR, {r, g, b}}); }
+    void set_line_colour(double r, double g, double b) override { _commands.push_back({
+        Operation::LINE_COLOUR, {r, g, b}
+ }); }
+    void set_fill_colour(double r, double g, double b) override { _commands.push_back({
+        Operation::FILL_COLOUR, {r, g, b}
+ }); }
     void set_fill_opacity(double opacity) override { _commands.push_back({Operation::FILL_OPACITY, {opacity}}); }
 
   private:
     enum class Operation {
-        INITIALISE, FINALISE, MOVE_TO, LINE_TO, CIRCLE, DOT, STROKE, FILL,
-        LINE_WIDTH, LINE_COLOUR, FILL_COLOUR, FILL_OPACITY
+        INITIALISE,
+        FINALISE,
+        MOVE_TO,
+        LINE_TO,
+        CIRCLE,
+        DOT,
+        STROKE,
+        FILL,
+        LINE_WIDTH,
+        LINE_COLOUR,
+        FILL_COLOUR,
+        FILL_OPACITY
     };
     struct Command {
         Operation operation;
