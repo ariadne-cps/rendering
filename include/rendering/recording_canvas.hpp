@@ -62,6 +62,7 @@ class RecordingCanvas final : public CanvasBase {
                 case Operation::LINE_COLOUR: target.set_line_colour(a[0], a[1], a[2]); break;
                 case Operation::FILL_COLOUR: target.set_fill_colour(a[0], a[1], a[2]); break;
                 case Operation::FILL_OPACITY: target.set_fill_opacity(a[0]); break;
+                default: throw std::logic_error("Unknown recording canvas command");
             }
         }
     }
@@ -93,8 +94,8 @@ class RecordingCanvas final : public CanvasBase {
     struct Command {
         Operation operation;
         std::array<double, 4> args{};
-        StringType x_label;
-        StringType y_label;
+        StringType x_label{};
+        StringType y_label{};
     };
     std::vector<Command> _commands;
 };
