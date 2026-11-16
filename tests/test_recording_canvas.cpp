@@ -27,7 +27,7 @@
 
 using namespace Ariadne;
 
-class TracingCanvas final : public CanvasBase {
+class TracingCanvas final : public CanvasInterface {
   public:
     std::vector<std::string> events;
     void record(const char* action, double a = 0, double b = 0, double c = 0, double d = 0) {
@@ -47,6 +47,11 @@ class TracingCanvas final : public CanvasBase {
     void dot(double x, double y) override { record("dot", x, y); }
     void stroke() override { record("stroke"); }
     void fill() override { record("fill"); }
+    void fill_boundary(const List<Point2d>& boundary) override {
+        record("boundary", static_cast<double>(boundary.size()));
+        for (const auto& point: boundary)
+            record("boundary_point", point.x, point.y);
+    }
     void set_line_width(double w) override { record("width", w); }
     void set_line_colour(double r, double g, double b) override { record("line_colour", r, g, b); }
     void set_fill_colour(double r, double g, double b) override { record("fill_colour", r, g, b); }
@@ -70,6 +75,8 @@ class TestRecordingCanvas : public Ariadne::Testing::ContextFixture {
             canvas.circle(2, 3, 4);
             canvas.dot(1, 1);
             canvas.fill();
+            const List<Point2d> boundary{Point2d(0, 0), Point2d(1, 0), Point2d(1, 1), Point2d(0, 1)};
+            canvas.fill_boundary(boundary);
             canvas.stroke();
             canvas.finalise();
         };

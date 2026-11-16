@@ -28,7 +28,8 @@
 #include <utility>
 #include <vector>
 
-#include "rendering/rendering_base.hpp"
+#include "rendering/geometry2d.hpp"
+#include "rendering/rendering_interface.hpp"
 
 namespace Ariadne {
 
@@ -36,7 +37,7 @@ namespace Ariadne {
 //! Each instance may be populated by a different worker, then replayed by a
 //! single consumer on the final canvas. Concurrent writes to one instance are
 //! deliberately not supported.
-class RecordingCanvas final : public CanvasBase {
+class RecordingCanvas final : public CanvasInterface {
   public:
     //! Number of recorded drawing commands.
     std::size_t size() const noexcept { return _commands.size(); }
@@ -73,6 +74,9 @@ class RecordingCanvas final : public CanvasBase {
                     break;
                 case Operation::FILL:
                     target.fill();
+                    break;
+                case Operation::FILL_BOUNDARY:
+                    target.fill_boundary(cmd.boundary);
                     break;
                 case Operation::LINE_WIDTH:
                     target.set_line_width(a[0]);
@@ -117,6 +121,9 @@ class RecordingCanvas final : public CanvasBase {
  }); }
     void stroke() override { _commands.push_back({Operation::STROKE}); }
     void fill() override { _commands.push_back({Operation::FILL}); }
+    void fill_boundary(const List<Point2d>& boundary) override {
+        _commands.push_back({Operation::FILL_BOUNDARY, {}, {}, {}, boundary});
+    }
     void set_line_width(double width) override { _commands.push_back({Operation::LINE_WIDTH, {width}}); }
     void set_line_colour(double r, double g, double b) override { _commands.push_back({
         Operation::LINE_COLOUR, {r, g, b}
@@ -136,6 +143,7 @@ class RecordingCanvas final : public CanvasBase {
         DOT,
         STROKE,
         FILL,
+        FILL_BOUNDARY,
         LINE_WIDTH,
         LINE_COLOUR,
         FILL_COLOUR,
@@ -146,6 +154,7 @@ class RecordingCanvas final : public CanvasBase {
         std::array<double, 4> args{};
         StringType x_label{};
         StringType y_label{};
+        List<Point2d> boundary{};
     };
     std::vector<Command> _commands;
 };
